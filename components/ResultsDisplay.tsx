@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { FileNode, File as FileType } from '../types';
-import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon } from './icons/Icons';
+import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon, JsIcon, TsIcon, HtmlIcon, CssIcon, JsonIcon, MarkdownIcon, NpmIcon, GitIcon, TailwindIcon, ViteIcon } from './icons/Icons';
 
 declare global {
   interface Window {
@@ -39,7 +39,35 @@ const getLanguageFromFileName = (fileName: string): string => {
   }
 };
 
-// Custom hook to manage the state of the recursive file tree (expanded/collapsed folders)
+const getFileIconComponent = (fileName: string): React.FC<React.SVGProps<SVGSVGElement>> => {
+    if (fileName === 'package.json') return NpmIcon;
+    if (fileName === '.gitignore') return GitIcon;
+    if (fileName.includes('tailwind.config')) return TailwindIcon;
+    if (fileName.includes('vite.config')) return ViteIcon;
+    
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+        case 'js':
+        case 'jsx':
+            return JsIcon;
+        case 'ts':
+        case 'tsx':
+            return TsIcon;
+        case 'html':
+            return HtmlIcon;
+        case 'css':
+        case 'scss':
+        case 'sass':
+            return CssIcon;
+        case 'json':
+            return JsonIcon;
+        case 'md':
+            return MarkdownIcon;
+        default:
+            return FileIcon;
+    }
+};
+
 const useFileTreeState = () => {
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
@@ -55,10 +83,9 @@ const useFileTreeState = () => {
         });
     }, []);
 
-    return { expandedFolders, toggleFolder };
+    return { expandedFolders, toggleFolder, setExpandedFolders };
 };
 
-// Recursive component to render a single node (file or folder) in the tree
 const TreeNode: React.FC<{
     node: FileNode;
     level: number;
@@ -75,15 +102,17 @@ const TreeNode: React.FC<{
             <li>
                 <button
                     onClick={() => toggleFolder(currentPath)}
-                    className="w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors text-gray-400 hover:bg-gray-700/50"
+                    className="w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors text-gray-400 hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-700/50"
                     style={{ paddingLeft: `${level * 1.25}rem` }}
+                    aria-expanded={isExpanded}
+                    role="treeitem"
                 >
                     {isExpanded ? <ChevronDownIcon className="h-4 w-4 flex-shrink-0" /> : <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />}
-                    <FolderIcon className="h-5 w-5 flex-shrink-0" />
+                    <FolderIcon className="h-5 w-5 flex-shrink-0 text-sky-400" />
                     <span>{node.name}</span>
                 </button>
                 {isExpanded && (
-                    <ul className="space-y-1">
+                    <ul role="group">
                         {node.children.sort((a,b) => {
                             if (a.type === 'folder' && b.type === 'file') return -1;
                             if (a.type === 'file' && b.type === 'folder') return 1;
@@ -106,26 +135,66 @@ const TreeNode: React.FC<{
         );
     }
 
-    // It's a file
+    const FileIconComponent = getFileIconComponent(node.name);
     return (
         <li style={{ paddingLeft: `${(level * 1.25)}rem` }}>
              <button 
                 onClick={() => onSelectFile(node)} 
-                className={`w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors ${selectedFile?.name === node.name && selectedFile?.content === node.content ? 'bg-indigo-900/50 text-white' : 'hover:bg-gray-700/50 text-gray-300'}`}
+                className={`w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors ${selectedFile?.name === node.name && selectedFile?.content === node.content ? 'bg-indigo-900/50 text-white' : 'hover:bg-gray-700/50 text-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-700/50`}
+                role="treeitem"
              >
-                <FileIcon className="h-5 w-5 flex-shrink-0 ml-4" />
+                <FileIconComponent className="h-5 w-5 flex-shrink-0 ml-4" />
                 <span>{node.name}</span>
             </button>
         </li>
     );
 };
 
-// The main component that initializes the tree state and renders the root nodes
-const FileTreeView: React.FC<{ nodes: FileNode[]; onSelectFile: (file: FileType) => void; selectedFile: FileType | null; }> = ({ nodes, onSelectFile, selectedFile }) => {
-    const { expandedFolders, toggleFolder } = useFileTreeState();
-    
+const FileTreeView: React.FC<{
+    nodes: FileNode[];
+    onSelectFile: (file: FileType) => void;
+    selectedFile: FileType | null;
+    expandedFolders: Set<string>;
+    toggleFolder: (path: string) => void;
+}> = ({ nodes, onSelectFile, selectedFile, expandedFolders, toggleFolder }) => {
+    const treeRef = useRef<HTMLUListElement>(null);
+
+    // Fix: Correctly type focusable nodes and handle active element to prevent TS errors.
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLUListElement>) => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') {
+            return;
+        }
+        e.preventDefault();
+
+        const focusableNodes = Array.from(
+            treeRef.current?.querySelectorAll('[role="treeitem"]') ?? []
+        ) as HTMLElement[];
+
+        const activeElement = document.activeElement;
+        const currentIndex = focusableNodes.findIndex(node => node === activeElement);
+
+        if (currentIndex === -1 && focusableNodes.length > 0) {
+            focusableNodes[0].focus();
+            return;
+        }
+
+        let nextIndex = -1;
+        if (e.key === 'ArrowDown') {
+            nextIndex = currentIndex + 1;
+        } else if (e.key === 'ArrowUp') {
+            nextIndex = currentIndex - 1;
+        }
+
+        if (nextIndex >= 0 && nextIndex < focusableNodes.length) {
+            focusableNodes[nextIndex].focus();
+        }
+    }, []);
+
     return (
-        <ul className="space-y-1">
+        <ul className="space-y-1" role="tree" ref={treeRef} onKeyDown={handleKeyDown}>
+            {nodes.length === 0 && (
+                <li className="p-2 text-sm text-gray-500 text-center">No files found.</li>
+            )}
             {nodes.sort((a,b) => {
                 if (a.type === 'folder' && b.type === 'file') return -1;
                 if (a.type === 'file' && b.type === 'folder') return 1;
@@ -198,8 +267,62 @@ interface ResultsDisplayProps {
   files: FileNode[];
 }
 
+const filterNodes = (nodes: FileNode[], query: string): FileNode[] => {
+    if (!query.trim()) {
+        return nodes;
+    }
+    const lowerCaseQuery = query.toLowerCase();
+
+    const filter = (node: FileNode): FileNode | null => {
+        if (node.type === 'file') {
+            return node.name.toLowerCase().includes(lowerCaseQuery) ? node : null;
+        }
+
+        if (node.type === 'folder') {
+            if (node.name.toLowerCase().includes(lowerCaseQuery)) {
+                return node;
+            }
+
+            const filteredChildren = node.children
+                .map(filter)
+                .filter((n): n is FileNode => n !== null);
+
+            if (filteredChildren.length > 0) {
+                return { ...node, children: filteredChildren };
+            }
+        }
+
+        return null;
+    };
+
+    return nodes.map(filter).filter((n): n is FileNode => n !== null);
+};
+
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
   const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { expandedFolders, toggleFolder, setExpandedFolders } = useFileTreeState();
+
+  const filteredFiles = useMemo(() => filterNodes(files, searchQuery), [files, searchQuery]);
+
+  useEffect(() => {
+      if (searchQuery) {
+          const allFolderPaths = new Set<string>();
+          const findFolders = (nodes: FileNode[], currentPath: string) => {
+              nodes.forEach(node => {
+                  const path = currentPath ? `${currentPath}/${node.name}` : node.name;
+                  if (node.type === 'folder') {
+                      allFolderPaths.add(path);
+                      findFolders(node.children, path);
+                  }
+              });
+          };
+          findFolders(filteredFiles, '');
+          setExpandedFolders(allFolderPaths);
+      } else {
+          setExpandedFolders(new Set());
+      }
+  }, [searchQuery, filteredFiles, setExpandedFolders]);
 
   const handleDownloadZip = async () => {
     if (!files || !window.JSZip) {
@@ -251,8 +374,26 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
         </button>
       </div>
       <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
-        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 p-4 overflow-y-auto">
-          <FileTreeView nodes={files} onSelectFile={setSelectedFile} selectedFile={selectedFile} />
+        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 flex flex-col">
+          <div className="p-2 border-b border-gray-700">
+              <input
+                  type="text"
+                  placeholder="Filter files..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-gray-500"
+                  aria-label="Filter files by name"
+              />
+          </div>
+          <div className="p-2 overflow-y-auto flex-grow">
+            <FileTreeView
+                nodes={filteredFiles}
+                onSelectFile={setSelectedFile}
+                selectedFile={selectedFile}
+                expandedFolders={expandedFolders}
+                toggleFolder={toggleFolder}
+            />
+          </div>
         </div>
         <div className="w-2/3 flex-grow">
           <CodeViewer file={selectedFile} />
