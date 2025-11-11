@@ -1,0 +1,5 @@
+{
+  "name": "Prompt-to-Project Starter",
+  "description": "An AI-powered tool that turns your natural language project ideas into a complete, ready-to-run starter codebase using Gemini. Describe your app, choose your stack, and get a full project structure with code in seconds.",
+  "requestFramePermissions": []
+}
