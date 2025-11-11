@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { ProjectOptions } from '../types';
-import { STACK_OPTIONS, PATTERN_OPTIONS, AUTH_OPTIONS, TESTING_OPTIONS, INFRA_OPTIONS, DEFAULT_PROJECT_OPTIONS } from '../constants';
+import { STACK_OPTIONS, PATTERN_OPTIONS, AUTH_OPTIONS, TESTING_OPTIONS, INFRA_OPTIONS, DEFAULT_PROJECT_OPTIONS, BACKEND_OPTIONS, FRONTEND_OPTIONS } from '../constants';
 import { SparklesIcon, ChevronDownIcon } from './icons/Icons';
 
 interface PromptFormProps {
@@ -9,7 +8,7 @@ interface PromptFormProps {
   isLoading: boolean;
 }
 
-const FormSelect: React.FC<{label: string, value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[]}> = ({ label, value, onChange, options }) => (
+const FormSelect: React.FC<{label: string, value: string | undefined, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[]}> = ({ label, value, onChange, options }) => (
     <div>
         <label className="block text-sm font-medium text-gray-300">{label}</label>
         <div className="relative mt-1">
@@ -57,7 +56,17 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormSelect label="Tech Stack" value={options.stack} onChange={(e) => handleChange('stack', e.target.value)} options={STACK_OPTIONS} />
+        <div className="md:col-span-2">
+            <FormSelect label="Tech Stack" value={options.stack} onChange={(e) => handleChange('stack', e.target.value)} options={STACK_OPTIONS} />
+        </div>
+        
+        {options.stack === 'Custom' && (
+            <>
+                 <FormSelect label="Backend Framework" value={options.backend} onChange={(e) => handleChange('backend', e.target.value)} options={BACKEND_OPTIONS} />
+                 <FormSelect label="Frontend Framework" value={options.frontend} onChange={(e) => handleChange('frontend', e.target.value)} options={FRONTEND_OPTIONS} />
+            </>
+        )}
+
         <FormSelect label="Architecture Pattern" value={options.pattern} onChange={(e) => handleChange('pattern', e.target.value)} options={PATTERN_OPTIONS} />
         <FormSelect label="Authentication" value={options.auth} onChange={(e) => handleChange('auth', e.target.value)} options={AUTH_OPTIONS} />
         <FormSelect label="Testing Framework" value={options.testing} onChange={(e) => handleChange('testing', e.target.value)} options={TESTING_OPTIONS} />

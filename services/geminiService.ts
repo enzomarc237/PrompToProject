@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { FileNode, ProjectOptions } from '../types';
 
@@ -26,13 +25,17 @@ Your output MUST be a single, valid JSON object representing an array of file an
 };
 
 const createUserPrompt = (options: ProjectOptions) => {
+  const stackInfo = options.stack === 'Custom'
+    ? `- **Custom Stack:**\n  - **Frontend:** ${options.frontend}\n  - **Backend:** ${options.backend}`
+    : `- **Stack:** ${options.stack}`;
+
   return `Generate a complete starter project based on the following requirements.
 
 **Project Description:**
 ${options.description}
 
 **Technical Preferences:**
-- **Stack:** ${options.stack}
+${stackInfo}
 - **Architecture Pattern:** ${options.pattern}
 - **Authentication:** ${options.auth}
 - **Testing Framework:** ${options.testing}

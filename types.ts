@@ -1,4 +1,3 @@
-
 export interface ProjectOptions {
   description: string;
   stack: string;
@@ -6,6 +5,8 @@ export interface ProjectOptions {
   auth: string;
   testing: string;
   infra: string;
+  backend?: string;
+  frontend?: string;
 }
 
 export type File = {

@@ -36,30 +36,37 @@ const SkeletonLoader = () => (
     </div>
 );
 
-const GenerationProgress: React.FC<{ details: ProjectOptions }> = ({ details }) => (
-    <>
-        <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-bold text-white">Generating Project...</h3>
-        </div>
-        <div className="relative">
-            <SkeletonLoader />
-            <div className="absolute inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center">
-                <div className="text-center p-8 bg-gray-900 rounded-lg shadow-2xl border border-gray-700 max-w-md mx-auto">
-                    <div className="flex justify-center items-center mb-4">
-                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-400"></div>
-                    </div>
-                    <h4 className="text-xl font-semibold text-white mb-2">Crafting Your Codebase</h4>
-                    <p className="text-gray-400 mb-6">Gemini is building your project. This might take a moment.</p>
-                    <div className="text-left text-sm space-y-2 bg-gray-800/50 p-4 rounded-md border border-gray-700">
-                        <p><strong className="font-medium text-gray-300 w-28 inline-block">Stack:</strong> <span className="text-indigo-300">{details.stack}</span></p>
-                        <p><strong className="font-medium text-gray-300 w-28 inline-block">Pattern:</strong> <span className="text-indigo-300">{details.pattern}</span></p>
-                        <p><strong className="font-medium text-gray-300 w-28 inline-block">Auth:</strong> <span className="text-indigo-300">{details.auth}</span></p>
+const GenerationProgress: React.FC<{ details: ProjectOptions }> = ({ details }) => {
+    const stackDisplay = details.stack === 'Custom' 
+        ? `${details.frontend} + ${details.backend}`
+        : details.stack;
+
+    return (
+        <>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-white">Generating Project...</h3>
+            </div>
+            <div className="relative">
+                <SkeletonLoader />
+                <div className="absolute inset-0 bg-gray-800 bg-opacity-80 flex items-center justify-center">
+                    <div className="text-center p-8 bg-gray-900 rounded-lg shadow-2xl border border-gray-700 max-w-md mx-auto">
+                        <div className="flex justify-center items-center mb-4">
+                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-400"></div>
+                        </div>
+                        <h4 className="text-xl font-semibold text-white mb-2">Crafting Your Codebase</h4>
+                        <p className="text-gray-400 mb-6">Gemini is building your project. This might take a moment.</p>
+                        <div className="text-left text-sm space-y-2 bg-gray-800/50 p-4 rounded-md border border-gray-700">
+                            <p><strong className="font-medium text-gray-300 w-28 inline-block">Stack:</strong> <span className="text-indigo-300">{stackDisplay}</span></p>
+                            <p><strong className="font-medium text-gray-300 w-28 inline-block">Pattern:</strong> <span className="text-indigo-300">{details.pattern}</span></p>
+                            <p><strong className="font-medium text-gray-300 w-28 inline-block">Auth:</strong> <span className="text-indigo-300">{details.auth}</span></p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </>
-);
+        </>
+    );
+};
+
 
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
