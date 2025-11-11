@@ -1,8 +1,7 @@
-
 import React, { useState, useCallback } from 'react';
 import { PromptForm } from './components/PromptForm';
 import { ResultsDisplay } from './components/ResultsDisplay';
-import { SparklesIcon, CodeBracketSquareIcon } from './components/icons/Icons';
+import { CodeBracketSquareIcon } from './components/icons/Icons';
 import { generateProjectStructure } from './services/geminiService';
 import { FileNode, ProjectOptions } from './types';
 
@@ -54,18 +53,6 @@ const App: React.FC = () => {
           
           <PromptForm onGenerate={handleGenerateProject} isLoading={isLoading} />
 
-          {isLoading && (
-            <div className="mt-10 text-center">
-              <div className="flex justify-center items-center space-x-3">
-                <SparklesIcon className="h-8 w-8 text-indigo-400 animate-pulse" />
-                <p className="text-lg text-gray-300">Generating project... This may take a moment.</p>
-              </div>
-               <div className="mt-4 w-full bg-gray-700 rounded-full h-2.5">
-                  <div className="bg-indigo-500 h-2.5 rounded-full animate-pulse" style={{width: '75%'}}></div>
-               </div>
-            </div>
-          )}
-
           {error && (
             <div className="mt-10 bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg" role="alert">
               <strong className="font-bold">Error: </strong>
@@ -73,10 +60,9 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {generatedFiles && (
+          {(isLoading || generatedFiles) && (
             <div className="mt-12">
-              <h3 className="text-2xl font-bold text-white mb-4">Generated Project</h3>
-              <ResultsDisplay files={generatedFiles} />
+              <ResultsDisplay files={generatedFiles} isLoading={isLoading} />
             </div>
           )}
         </div>

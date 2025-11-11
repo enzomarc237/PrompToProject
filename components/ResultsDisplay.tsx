@@ -1,11 +1,48 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FileNode, File as FileType } from '../types';
-import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon } from './icons/Icons';
+import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon } from './icons/Icons';
+
+declare global {
+  interface Window {
+    JSZip: any;
+    hljs: any;
+  }
+}
 
 interface ResultsDisplayProps {
-  files: FileNode[];
+  files: FileNode[] | null;
+  isLoading: boolean;
 }
+
+const getLanguageFromFileName = (fileName: string): string => {
+  if (fileName.toLowerCase() === 'dockerfile') return 'dockerfile';
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'js':
+    case 'jsx':
+      return 'javascript';
+    case 'ts':
+    case 'tsx':
+      return 'typescript';
+    case 'py':
+      return 'python';
+    case 'html':
+      return 'xml'; // highlight.js uses 'xml' for html
+    case 'css':
+      return 'css';
+    case 'json':
+      return 'json';
+    case 'md':
+      return 'markdown';
+    case 'sh':
+      return 'bash';
+    case 'yml':
+    case 'yaml':
+      return 'yaml';
+    default:
+      return 'plaintext';
+  }
+};
 
 const FileTree: React.FC<{ nodes: FileNode[]; onSelectFile: (file: FileType) => void; selectedFile: FileType | null; level?: number; }> = ({ nodes, onSelectFile, selectedFile, level = 0 }) => {
     return (
@@ -15,7 +52,7 @@ const FileTree: React.FC<{ nodes: FileNode[]; onSelectFile: (file: FileType) => 
                 if (a.type === 'file' && b.type === 'folder') return 1;
                 return a.name.localeCompare(b.name);
             }).map(node => (
-                <li key={node.name} style={{ paddingLeft: `${level * 1.25}rem`}}>
+                <li key={`${node.name}-${level}`} style={{ paddingLeft: `${level * 1.25}rem`}}>
                     {node.type === 'folder' ? (
                         <div>
                             <div className="flex items-center space-x-2 text-gray-400">
@@ -41,6 +78,13 @@ const FileTree: React.FC<{ nodes: FileNode[]; onSelectFile: (file: FileType) => 
 
 const CodeViewer: React.FC<{ file: FileType | null }> = ({ file }) => {
     const [copied, setCopied] = useState(false);
+    const codeRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        if (codeRef.current && window.hljs) {
+            window.hljs.highlightElement(codeRef.current);
+        }
+    }, [file]);
 
     const handleCopy = () => {
         if (file) {
@@ -58,6 +102,8 @@ const CodeViewer: React.FC<{ file: FileType | null }> = ({ file }) => {
         );
     }
 
+    const language = getLanguageFromFileName(file.name);
+
     return (
         <div className="flex flex-col h-full bg-gray-950 rounded-lg">
             <div className="flex items-center justify-between p-3 border-b border-gray-700">
@@ -71,26 +117,119 @@ const CodeViewer: React.FC<{ file: FileType | null }> = ({ file }) => {
                 </button>
             </div>
             <div className="flex-grow overflow-auto p-4">
-                 <pre className="text-sm">
-                    <code className="language-javascript">{file.content}</code>
-                </pre>
+                 <pre className="text-sm bg-transparent p-0 m-0"><code ref={codeRef} className={`language-${language}`}>{file.content}</code></pre>
             </div>
         </div>
     );
 };
 
+const SkeletonLoader = () => (
+    <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex animate-pulse">
+        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 p-4 space-y-4">
+            {[...Array(3)].map((_, i) => (
+                <div key={i}>
+                    <div className="h-5 bg-gray-700 rounded w-3/4"></div>
+                    <div className="pl-5 mt-2 space-y-2">
+                        <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+                    </div>
+                </div>
+            ))}
+             <div className="h-5 bg-gray-700 rounded w-3/4 mt-4"></div>
+             <div className="h-5 bg-gray-700 rounded w-1/2 mt-4"></div>
+        </div>
+        <div className="w-2/3 flex-grow flex flex-col bg-gray-800">
+            <div className="p-3 border-b border-gray-700">
+                <div className="h-5 bg-gray-700 rounded w-1/4"></div>
+            </div>
+            <div className="p-4 space-y-2 flex-grow">
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+            </div>
+        </div>
+    </div>
+);
 
-export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
+
+export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files, isLoading }) => {
   const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
 
+  const handleDownloadZip = async () => {
+    if (!files || !window.JSZip) {
+        console.error("Files not available or JSZip not loaded.");
+        return;
+    }
+
+    const zip = new window.JSZip();
+
+    const addFilesToZip = (zipFolder: any, nodes: FileNode[]) => {
+        nodes.forEach(node => {
+            if (node.type === 'folder') {
+                const newFolder = zipFolder.folder(node.name);
+                if (node.children.length > 0) {
+                    addFilesToZip(newFolder, node.children);
+                }
+            } else {
+                zipFolder.file(node.name, node.content);
+            }
+        });
+    };
+    
+    addFilesToZip(zip, files);
+
+    try {
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'project.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    } catch (e) {
+        console.error("Error generating zip file:", e);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <>
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-white">Generating Project...</h3>
+        </div>
+        <SkeletonLoader />
+      </>
+    );
+  }
+
+  if (!files) {
+      return null;
+  }
+
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
-      <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 p-4 overflow-y-auto">
-        <FileTree nodes={files} onSelectFile={setSelectedFile} selectedFile={selectedFile} />
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-2xl font-bold text-white">Generated Project</h3>
+        <button
+          onClick={handleDownloadZip}
+          className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500"
+        >
+          <ArrowDownTrayIcon className="h-5 w-5" />
+          <span>Download .zip</span>
+        </button>
       </div>
-      <div className="w-2/3 flex-grow">
-        <CodeViewer file={selectedFile} />
+      <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
+        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 p-4 overflow-y-auto">
+          <FileTree nodes={files} onSelectFile={setSelectedFile} selectedFile={selectedFile} />
+        </div>
+        <div className="w-2/3 flex-grow">
+          <CodeViewer file={selectedFile} />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
