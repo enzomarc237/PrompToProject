@@ -10,8 +10,7 @@ declare global {
 }
 
 interface ResultsDisplayProps {
-  files: FileNode[] | null;
-  isLoading: boolean;
+  files: FileNode[];
 }
 
 const getLanguageFromFileName = (fileName: string): string => {
@@ -123,39 +122,8 @@ const CodeViewer: React.FC<{ file: FileType | null }> = ({ file }) => {
     );
 };
 
-const SkeletonLoader = () => (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex animate-pulse">
-        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 p-4 space-y-4">
-            {[...Array(3)].map((_, i) => (
-                <div key={i}>
-                    <div className="h-5 bg-gray-700 rounded w-3/4"></div>
-                    <div className="pl-5 mt-2 space-y-2">
-                        <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                        <div className="h-4 bg-gray-700 rounded w-2/3"></div>
-                    </div>
-                </div>
-            ))}
-             <div className="h-5 bg-gray-700 rounded w-3/4 mt-4"></div>
-             <div className="h-5 bg-gray-700 rounded w-1/2 mt-4"></div>
-        </div>
-        <div className="w-2/3 flex-grow flex flex-col bg-gray-800">
-            <div className="p-3 border-b border-gray-700">
-                <div className="h-5 bg-gray-700 rounded w-1/4"></div>
-            </div>
-            <div className="p-4 space-y-2 flex-grow">
-                <div className="h-4 bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-700 rounded w-5/6"></div>
-                <div className="h-4 bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-700 rounded w-full"></div>
-            </div>
-        </div>
-    </div>
-);
 
-
-export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files, isLoading }) => {
+export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
   const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
 
   const handleDownloadZip = async () => {
@@ -194,21 +162,6 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files, isLoading
         console.error("Error generating zip file:", e);
     }
   };
-
-  if (isLoading) {
-    return (
-      <>
-        <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-bold text-white">Generating Project...</h3>
-        </div>
-        <SkeletonLoader />
-      </>
-    );
-  }
-
-  if (!files) {
-      return null;
-  }
 
   return (
     <>
