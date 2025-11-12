@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { FileNode, File as FileType } from '../types';
-import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon, JsIcon, TsIcon, HtmlIcon, CssIcon, JsonIcon, MarkdownIcon, NpmIcon, GitIcon, TailwindIcon, ViteIcon } from './icons/Icons';
+import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon, JsIcon, TsIcon, HtmlIcon, CssIcon, JsonIcon, MarkdownIcon, NpmIcon, GitIcon, TailwindIcon, ViteIcon, FlutterIcon, SwiftIcon, KotlinIcon, FirebaseIcon } from './icons/Icons';
 
 declare global {
   interface Window {
@@ -21,6 +21,13 @@ const getLanguageFromFileName = (fileName: string): string => {
       return 'typescript';
     case 'py':
       return 'python';
+    case 'dart':
+      return 'dart';
+    case 'swift':
+      return 'swift';
+    case 'kt':
+    case 'kts':
+      return 'kotlin';
     case 'html':
       return 'xml'; // highlight.js uses 'xml' for html
     case 'css':
@@ -44,6 +51,8 @@ const getFileIconComponent = (fileName: string): React.FC<React.SVGProps<SVGSVGE
     if (fileName === '.gitignore') return GitIcon;
     if (fileName.includes('tailwind.config')) return TailwindIcon;
     if (fileName.includes('vite.config')) return ViteIcon;
+    if (fileName === 'firebase.json' || fileName === '.firebaserc') return FirebaseIcon;
+    if (fileName === 'pubspec.yaml') return FlutterIcon;
     
     const extension = fileName.split('.').pop()?.toLowerCase();
     switch (extension) {
@@ -53,6 +62,13 @@ const getFileIconComponent = (fileName: string): React.FC<React.SVGProps<SVGSVGE
         case 'ts':
         case 'tsx':
             return TsIcon;
+        case 'dart':
+            return FlutterIcon;
+        case 'swift':
+            return SwiftIcon;
+        case 'kt':
+        case 'kts':
+            return KotlinIcon;
         case 'html':
             return HtmlIcon;
         case 'css':

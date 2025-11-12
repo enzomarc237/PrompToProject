@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ProjectOptions } from '../types';
 import { STACK_OPTIONS, PATTERN_OPTIONS, AUTH_OPTIONS, TESTING_OPTIONS, INFRA_OPTIONS, DEFAULT_PROJECT_OPTIONS, BACKEND_OPTIONS, FRONTEND_OPTIONS } from '../constants';
 import { SparklesIcon, ChevronDownIcon } from './icons/Icons';
@@ -26,13 +26,35 @@ const FormSelect: React.FC<{label: string, value: string | undefined, onChange: 
     </div>
 );
 
+const LOCAL_STORAGE_KEY = 'prompt-to-project-options';
 
 export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading }) => {
-  const [options, setOptions] = useState<ProjectOptions>(DEFAULT_PROJECT_OPTIONS);
+  const [options, setOptions] = useState<ProjectOptions>(() => {
+    try {
+      const savedOptions = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedOptions) {
+        const parsed = JSON.parse(savedOptions);
+        // Merge with defaults to handle cases where new options are added
+        // and not present in the user's saved data.
+        return { ...DEFAULT_PROJECT_OPTIONS, ...parsed };
+      }
+    } catch (error) {
+      console.error('Could not load project options from localStorage', error);
+    }
+    return DEFAULT_PROJECT_OPTIONS;
+  });
 
-  const handleChange = (field: keyof ProjectOptions, value: string) => {
-    setOptions(prev => ({ ...prev, [field]: value }));
-  };
+  useEffect(() => {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(options));
+    } catch (error) {
+        console.error('Could not save project options to localStorage', error);
+    }
+  }, [options]);
+
+  const handleChange = useCallback((field: keyof ProjectOptions) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
+    setOptions(prev => ({ ...prev, [field]: e.target.value }));
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,27 +72,27 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
           rows={5}
           className="block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-white p-3"
           value={options.description}
-          onChange={(e) => handleChange('description', e.target.value)}
+          onChange={handleChange('description')}
           placeholder="Describe your project idea here..."
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">
-            <FormSelect label="Tech Stack" value={options.stack} onChange={(e) => handleChange('stack', e.target.value)} options={STACK_OPTIONS} />
+            <FormSelect label="Tech Stack" value={options.stack} onChange={handleChange('stack')} options={STACK_OPTIONS} />
         </div>
         
         {options.stack === 'Custom' && (
             <>
-                 <FormSelect label="Backend Framework" value={options.backend} onChange={(e) => handleChange('backend', e.target.value)} options={BACKEND_OPTIONS} />
-                 <FormSelect label="Frontend Framework" value={options.frontend} onChange={(e) => handleChange('frontend', e.target.value)} options={FRONTEND_OPTIONS} />
+                 <FormSelect label="Backend Framework" value={options.backend} onChange={handleChange('backend')} options={BACKEND_OPTIONS} />
+                 <FormSelect label="Frontend Framework" value={options.frontend} onChange={handleChange('frontend')} options={FRONTEND_OPTIONS} />
             </>
         )}
 
-        <FormSelect label="Architecture Pattern" value={options.pattern} onChange={(e) => handleChange('pattern', e.target.value)} options={PATTERN_OPTIONS} />
-        <FormSelect label="Authentication" value={options.auth} onChange={(e) => handleChange('auth', e.target.value)} options={AUTH_OPTIONS} />
-        <FormSelect label="Testing Framework" value={options.testing} onChange={(e) => handleChange('testing', e.target.value)} options={TESTING_OPTIONS} />
-        <FormSelect label="Infrastructure" value={options.infra} onChange={(e) => handleChange('infra', e.target.value)} options={INFRA_OPTIONS} />
+        <FormSelect label="Architecture Pattern" value={options.pattern} onChange={handleChange('pattern')} options={PATTERN_OPTIONS} />
+        <FormSelect label="Authentication" value={options.auth} onChange={handleChange('auth')} options={AUTH_OPTIONS} />
+        <FormSelect label="Testing Framework" value={options.testing} onChange={handleChange('testing')} options={TESTING_OPTIONS} />
+        <FormSelect label="Infrastructure" value={options.infra} onChange={handleChange('infra')} options={INFRA_OPTIONS} />
       </div>
 
       <div>

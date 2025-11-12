@@ -1,37 +1,52 @@
 import { ProjectOptions } from './types';
 
 export const STACK_OPTIONS = [
+    // Web
     'Next.js + Node/Express + Postgres',
     'React/Vite + FastAPI + MongoDB',
     'Vue + NestJS + MySQL',
     'SvelteKit + Go + SQLite',
     'Python/Flask + React',
     'Ruby on Rails + Vue',
+    // Mobile
+    'Flutter (Dart) + Firebase',
+    'React Native + Node/Express + MongoDB',
+    'SwiftUI + Vapor',
+    'Kotlin Multiplatform + Ktor',
+    // Custom
     'Custom'
 ];
 
 export const BACKEND_OPTIONS = [
+    'Firebase',
+    'Go (Gin)',
+    'Java (Spring Boot)',
+    'Ktor (Kotlin)',
     'Node.js (Express)',
     'Node.js (NestJS)',
+    'PHP (Laravel)',
+    'Python (Django)',
     'Python (FastAPI)',
     'Python (Flask)',
-    'Python (Django)',
-    'Go (Gin)',
     'Ruby (Ruby on Rails)',
-    'Java (Spring Boot)',
     'Rust (Actix-web)',
-    'PHP (Laravel)',
+    'Vapor (Swift)',
 ];
 
 export const FRONTEND_OPTIONS = [
-    'React (Vite)',
-    'Next.js',
-    'Vue.js',
-    'SvelteKit',
     'Angular',
-    'SolidJS',
+    'Flutter (Dart)',
     'HTMX (with a backend)',
+    'Jetpack Compose (Kotlin)',
+    'Kotlin Multiplatform',
+    'Next.js',
+    'React (Vite)',
+    'React Native',
+    'SolidJS',
+    'SvelteKit',
+    'SwiftUI',
     'Vanilla JS',
+    'Vue.js',
 ];
 
 export const PATTERN_OPTIONS = ['Monolith', 'Microservice-lite (API Gateway + 2 services)', 'API-first'];

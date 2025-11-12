@@ -61,18 +61,34 @@ const FileTypeIconWrapper: React.FC<{ children: React.ReactNode } & React.SVGPro
   </svg>
 );
 
-export const JsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <FileTypeIconWrapper {...props}>
-    <path fill="#F7DF1E" d="M0 0h32v32H0z" />
-    <path fill="#000" d="M21.2 24.3c.7 1.1 1.8 1.8 3.2 1.8 1.3 0 2.2-.6 2.2-1.5 0-.9-.6-1.3-1.8-1.9l-1-.4c-1.8-.8-3-1.8-3-4.2 0-2.3 1.8-4 4.5-4 2.1 0 3.6.8 4.6 2.6l-2.4 1.4c-.4-.9-1-1.3-1.9-1.3-1 0-1.5.5-1.5 1.3 0 .8.5 1.2 1.6 1.7l1 .4c2.2.9 3.4 2 3.4 4.4 0 2.7-2 4.4-5 4.4-2.8 0-4.7-1.3-5.7-3.1l2.2-1.4zM10.3 22.4c.5 1.4 1.4 2.1 2.8 2.1 1.3 0 2.1-.6 2.1-2.4V14.5h3.2v8.2c0 3.9-2.2 5.7-5.5 5.7-3.1 0-4.9-1.6-5.8-3.7l2.2-1.4z" />
+export const CssIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} strokeWidth={1.5} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+        <path fill="#1572B6" d="M2.6 2.2h18.8L19.8 19.7 12 21.8l-7.8-2.1L2.6 2.2z"/>
+        <path fill="#33A9DC" d="M12 4.2v15.9l6.5-1.8L18.4 4.2H12z"/>
+        <path fill="#EBEBEB" d="M12 9.2H8.3l-.2-2.5h4.1V4.2H5.4l.6 6.5h6V9.2zm-.1 3.2c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1zm-1.8-1c0 .5.4.8.8.8s.8-.3.8-.8-.4-.8-.8-.8-.8.3-.8.8z"/>
+        <path fill="#fff" d="M12 9.2v2.5h2.1l-.3 3.4-1.8.5v2.5l4.4-1.2.5-5.7H12V9.2zm2.1 3.2c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1zm-1.8-1c0 .5.4.8.8.8s.8-.3.8-.8-.4-.8-.8-.8-.8.3-.8.8z"/>
+    </FileTypeIconWrapper>
+);
+
+export const FirebaseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 64 64">
+        <path d="M9.3,53.4,32,10.6,54.7,53.4,43.2,42.4Z" fill="#f57c00" />
+        <path d="M9.3,53.4,22,29.1,32,46Z" fill="#ffa000" />
+        <path d="M9.3,53.4,32,10.6,22,29.1Z" fill="#ffca28" />
+    </FileTypeIconWrapper>
+);
+
+export const FlutterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+    <path d="M13.6 1.6L4.5 10.7l4.2 4.2L19.4 4.2 13.6 1.6zm.5 11.2l-4.2 4.2h8.5l-4.3-4.2z" fill="#40D0FD" />
+    <path d="M9.4 10.7L4.5 15.6l4.9 4.8h8.5l-4.2-4.2-4.3-4.2z" fill="#03599C" />
   </FileTypeIconWrapper>
 );
 
-export const TsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <FileTypeIconWrapper {...props}>
-    <path fill="#007ACC" d="M0 0h32v32H0z" />
-    <path fill="#fff" d="M19.4 14.8h-4.3v11.6h-3.2V14.8H7.6v-2.8h11.8v2.8zM24.4 22.8c.6 1.1 1.6 1.8 3 1.8 1.3 0 2.1-.6 2.1-1.5 0-.9-.6-1.3-1.7-1.8l-1-.4c-1.7-.7-2.9-1.7-2.9-4.1 0-2.3 1.7-4 4.4-4 2.1 0 3.5.8 4.5 2.6l-2.3 1.4c-.4-.9-1-1.3-1.8-1.3s-1.5.5-1.5 1.3c0 .8.5 1.2 1.6 1.7l1 .4c2.1.9 3.3 2 3.3 4.4 0 2.7-2 4.4-4.9 4.4-2.7 0-4.6-1.3-5.5-3.1l2.1-1.4z" />
-  </FileTypeIconWrapper>
+export const GitIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+        <path fill="#F05033" d="m22.5 10.7-5.9-5.9c-.4-.4-.9-.6-1.4-.6H4.2c-.8 0-1.5.7-1.5 1.5v13.3c0 .8.7 1.5 1.5 1.5h15.7c.8 0 1.5-.7 1.5-1.5V12c0-.5-.2-1-.6-1.3zM18 19.4H6V4.6h8.6l4.2 4.2v10.6zm-4.7-2.1c.4.4.4 1 0 1.4s-1 .4-1.4 0l-1.8-1.8-1.8 1.8c-.4.4-1 .4-1.4 0-.4-.4-.4-1 0-1.4l1.8-1.8-1.8-1.8c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l1.8 1.8 1.8-1.8c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-1.8 1.8 1.8 1.8zM14.5 12H9.3c-.3 0-.5-.2-.5-.5s.2-.5.5-.5h5.3c.3 0 .5.2.5.5s-.3.5-.6.5z"/>
+    </FileTypeIconWrapper>
 );
 
 export const HtmlIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -84,13 +100,11 @@ export const HtmlIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   </FileTypeIconWrapper>
 );
 
-export const CssIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <FileTypeIconWrapper {...props} strokeWidth={1.5} stroke="currentColor" fill="none" viewBox="0 0 24 24">
-        <path fill="#1572B6" d="M2.6 2.2h18.8L19.8 19.7 12 21.8l-7.8-2.1L2.6 2.2z"/>
-        <path fill="#33A9DC" d="M12 4.2v15.9l6.5-1.8L18.4 4.2H12z"/>
-        <path fill="#EBEBEB" d="M12 9.2H8.3l-.2-2.5h4.1V4.2H5.4l.6 6.5h6V9.2zm-.1 3.2c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1zm-1.8-1c0 .5.4.8.8.8s.8-.3.8-.8-.4-.8-.8-.8-.8.3-.8.8z"/>
-        <path fill="#fff" d="M12 9.2v2.5h2.1l-.3 3.4-1.8.5v2.5l4.4-1.2.5-5.7H12V9.2zm2.1 3.2c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1zm-1.8-1c0 .5.4.8.8.8s.8-.3.8-.8-.4-.8-.8-.8-.8.3-.8.8z"/>
-    </FileTypeIconWrapper>
+export const JsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props}>
+    <path fill="#F7DF1E" d="M0 0h32v32H0z" />
+    <path fill="#000" d="M21.2 24.3c.7 1.1 1.8 1.8 3.2 1.8 1.3 0 2.2-.6 2.2-1.5 0-.9-.6-1.3-1.8-1.9l-1-.4c-1.8-.8-3-1.8-3-4.2 0-2.3 1.8-4 4.5-4 2.1 0 3.6.8 4.6 2.6l-2.4 1.4c-.4-.9-1-1.3-1.9-1.3-1 0-1.5.5-1.5 1.3 0 .8.5 1.2 1.6 1.7l1 .4c2.2.9 3.4 2 3.4 4.4 0 2.7-2 4.4-5 4.4-2.8 0-4.7-1.3-5.7-3.1l2.2-1.4zM10.3 22.4c.5 1.4 1.4 2.1 2.8 2.1 1.3 0 2.1-.6 2.1-2.4V14.5h3.2v8.2c0 3.9-2.2 5.7-5.5 5.7-3.1 0-4.9-1.6-5.8-3.7l2.2-1.4z" />
+  </FileTypeIconWrapper>
 );
 
 export const JsonIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -98,6 +112,14 @@ export const JsonIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
         <path fillOpacity=".3" d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
         <path d="M11.4 15.8c-.8 0-1.4.3-2 .8l-1.3-1.3c.9-.8 2-1.3 3.3-1.3 2.3 0 3.5 1.4 3.5 3.3s-1.2 3.3-3.5 3.3c-1.3 0-2.4-.5-3.3-1.3l1.3-1.3c.5.5 1.1.8 1.9.8.9 0 1.5-.6 1.5-1.5s-.6-1.5-1.4-1.5zm1.2-5.4c.8 0 1.4-.3 1.9-.8l1.3 1.3c-.9.8-2 1.3-3.2 1.3-2.3 0-3.5-1.4-3.5-3.3S9.1 6.3 11.4 6.3c1.3 0 2.4.5 3.3 1.3l-1.3 1.3c-.5-.5-1.1-.8-2-.8-.9 0-1.5.6-1.5 1.5s.6 1.5 1.5 1.5z"/>
     </FileTypeIconWrapper>
+);
+
+export const KotlinIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+    <path fill="#7F52FF" d="M2 2h20l-10 10L2 2z"/>
+    <path fill="#7F52FF" d="M2 2v20l10-10L2 2z"/>
+    <path fill="#7F52FF" d="M22 22L2 2v20l20-20z"/>
+  </FileTypeIconWrapper>
 );
 
 export const MarkdownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -113,15 +135,23 @@ export const NpmIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     </FileTypeIconWrapper>
 );
 
-export const GitIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
-        <path fill="#F05033" d="m22.5 10.7-5.9-5.9c-.4-.4-.9-.6-1.4-.6H4.2c-.8 0-1.5.7-1.5 1.5v13.3c0 .8.7 1.5 1.5 1.5h15.7c.8 0 1.5-.7 1.5-1.5V12c0-.5-.2-1-.6-1.3zM18 19.4H6V4.6h8.6l4.2 4.2v10.6zm-4.7-2.1c.4.4.4 1 0 1.4s-1 .4-1.4 0l-1.8-1.8-1.8 1.8c-.4.4-1 .4-1.4 0-.4-.4-.4-1 0-1.4l1.8-1.8-1.8-1.8c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l1.8 1.8 1.8-1.8c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-1.8 1.8 1.8 1.8zM14.5 12H9.3c-.3 0-.5-.2-.5-.5s.2-.5.5-.5h5.3c.3 0 .5.2.5.5s-.3.5-.6.5z"/>
-    </FileTypeIconWrapper>
+export const SwiftIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+    <path fill="#F05138" d="M17.3 3.4C13 .1 6.8 4 6.8 4s6.9-1.9 11.2 2.4c4.4 4.4 2.4 11.2 2.4 11.2s1.9-6.9-3.1-11.2z"/>
+    <path fill="#FFFFFF" d="M16.7 4c-4-4-9.8 0-9.8 0s6-2.3 10 1.7c4 4 1.7 10 1.7 10s2.3-6-2-10zM12.3 12.4L18.4 6c-.4-.1-.8-.1-1.2-.1-1.3 0-2.5.4-3.6 1.1-.9.6-1.7 1.4-2.3 2.3l1 3.1z"/>
+  </FileTypeIconWrapper>
 );
 
 export const TailwindIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <FileTypeIconWrapper {...props} viewBox="0 0 24 24" fill="none">
     <path d="M12.001 4.529c1.316 0 2.42.415 3.33 1.245a4.525 4.525 0 011.252 3.323c0 1.316-.417 2.42-1.252 3.323-1.015 1.015-2.223 1.523-3.623 1.523-1.4 0-2.608-.508-3.623-1.523a4.525 4.525 0 01-1.252-3.323c0-1.316.417-2.42 1.252-3.323.91-.83 2.014-1.245 3.33-1.245zM19.001 12.029c1.316 0 2.42.415 3.33 1.245a4.525 4.525 0 011.252 3.323c0 1.316-.417 2.42-1.252 3.323-1.015 1.015-2.223 1.523-3.623 1.523-1.4 0-2.608-.508-3.623-1.523a4.525 4.525 0 01-1.252-3.323c0-1.316.417-2.42 1.252-3.323.91-.83 2.014-1.245 3.33-1.245z" fill="#38bdf8" />
+  </FileTypeIconWrapper>
+);
+
+export const TsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props}>
+    <path fill="#007ACC" d="M0 0h32v32H0z" />
+    <path fill="#fff" d="M19.4 14.8h-4.3v11.6h-3.2V14.8H7.6v-2.8h11.8v2.8zM24.4 22.8c.6 1.1 1.6 1.8 3 1.8 1.3 0 2.1-.6 2.1-1.5 0-.9-.6-1.3-1.7-1.8l-1-.4c-1.7-.7-2.9-1.7-2.9-4.1 0-2.3 1.7-4 4.4-4 2.1 0 3.5.8 4.5 2.6l-2.3 1.4c-.4-.9-1-1.3-1.8-1.3s-1.5.5-1.5 1.3c0 .8.5 1.2 1.6 1.7l1 .4c2.1.9 3.3 2 3.3 4.4 0 2.7-2 4.4-4.9 4.4-2.7 0-4.6-1.3-5.5-3.1l2.1-1.4z" />
   </FileTypeIconWrapper>
 );
 
