@@ -8,11 +8,12 @@ interface PromptFormProps {
   isLoading: boolean;
 }
 
-const FormSelect: React.FC<{label: string, value: string | undefined, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[]}> = ({ label, value, onChange, options }) => (
+const FormSelect: React.FC<{label: string, name: string, value: string | undefined, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[]}> = ({ label, name, value, onChange, options }) => (
     <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
         <div className="relative mt-1">
             <select
+                name={name}
                 value={value}
                 onChange={onChange}
                 className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none text-gray-900 dark:text-gray-200"
@@ -52,8 +53,9 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
     }
   }, [options]);
 
-  const handleChange = (field: keyof ProjectOptions) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
-    setOptions(prev => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setOptions(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,30 +71,31 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
         </label>
         <textarea
           id="description"
+          name="description"
           rows={5}
           className="block w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 dark:text-white p-3"
           value={options.description}
-          onChange={handleChange('description')}
+          onChange={handleChange}
           placeholder="Describe your project idea here..."
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">
-            <FormSelect label="Tech Stack" value={options.stack} onChange={handleChange('stack')} options={STACK_OPTIONS} />
+            <FormSelect label="Tech Stack" name="stack" value={options.stack} onChange={handleChange} options={STACK_OPTIONS} />
         </div>
         
         {options.stack === 'Custom' && (
             <>
-                 <FormSelect label="Backend Framework" value={options.backend} onChange={handleChange('backend')} options={BACKEND_OPTIONS} />
-                 <FormSelect label="Frontend Framework" value={options.frontend} onChange={handleChange('frontend')} options={FRONTEND_OPTIONS} />
+                 <FormSelect label="Backend Framework" name="backend" value={options.backend} onChange={handleChange} options={BACKEND_OPTIONS} />
+                 <FormSelect label="Frontend Framework" name="frontend" value={options.frontend} onChange={handleChange} options={FRONTEND_OPTIONS} />
             </>
         )}
 
-        <FormSelect label="Architecture Pattern" value={options.pattern} onChange={handleChange('pattern')} options={PATTERN_OPTIONS} />
-        <FormSelect label="Authentication" value={options.auth} onChange={handleChange('auth')} options={AUTH_OPTIONS} />
-        <FormSelect label="Testing Framework" value={options.testing} onChange={handleChange('testing')} options={TESTING_OPTIONS} />
-        <FormSelect label="Infrastructure" value={options.infra} onChange={handleChange('infra')} options={INFRA_OPTIONS} />
+        <FormSelect label="Architecture Pattern" name="pattern" value={options.pattern} onChange={handleChange} options={PATTERN_OPTIONS} />
+        <FormSelect label="Authentication" name="auth" value={options.auth} onChange={handleChange} options={AUTH_OPTIONS} />
+        <FormSelect label="Testing Framework" name="testing" value={options.testing} onChange={handleChange} options={TESTING_OPTIONS} />
+        <FormSelect label="Infrastructure" name="infra" value={options.infra} onChange={handleChange} options={INFRA_OPTIONS} />
       </div>
 
       <div>
