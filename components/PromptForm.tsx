@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ProjectOptions } from '../types';
 import { STACK_OPTIONS, PATTERN_OPTIONS, AUTH_OPTIONS, TESTING_OPTIONS, INFRA_OPTIONS, DEFAULT_PROJECT_OPTIONS, BACKEND_OPTIONS, FRONTEND_OPTIONS } from '../constants';
 import { SparklesIcon, ChevronDownIcon } from './icons/Icons';
@@ -53,10 +53,10 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
     }
   }, [options]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.currentTarget;
     setOptions(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
