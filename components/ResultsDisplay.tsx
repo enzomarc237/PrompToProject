@@ -118,13 +118,13 @@ const TreeNode: React.FC<{
             <li>
                 <button
                     onClick={() => toggleFolder(currentPath)}
-                    className="w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors text-gray-400 hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-700/50"
+                    className="w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-200 dark:focus:bg-gray-700/50"
                     style={{ paddingLeft: `${level * 1.25}rem` }}
                     aria-expanded={isExpanded}
                     role="treeitem"
                 >
                     {isExpanded ? <ChevronDownIcon className="h-4 w-4 flex-shrink-0" /> : <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />}
-                    <FolderIcon className="h-5 w-5 flex-shrink-0 text-sky-400" />
+                    <FolderIcon className="h-5 w-5 flex-shrink-0 text-sky-500 dark:text-sky-400" />
                     <span>{node.name}</span>
                 </button>
                 {isExpanded && (
@@ -152,11 +152,12 @@ const TreeNode: React.FC<{
     }
 
     const FileIconComponent = getFileIconComponent(node.name);
+    const isSelected = selectedFile?.name === node.name && selectedFile?.content === node.content;
     return (
         <li style={{ paddingLeft: `${(level * 1.25)}rem` }}>
              <button 
                 onClick={() => onSelectFile(node)} 
-                className={`w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors ${selectedFile?.name === node.name && selectedFile?.content === node.content ? 'bg-indigo-900/50 text-white' : 'hover:bg-gray-700/50 text-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-700/50`}
+                className={`w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors ${isSelected ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-200 dark:focus:bg-gray-700/50`}
                 role="treeitem"
              >
                 <FileIconComponent className="h-5 w-5 flex-shrink-0 ml-4" />
@@ -209,7 +210,7 @@ const FileTreeView: React.FC<{
     return (
         <ul className="space-y-1" role="tree" ref={treeRef} onKeyDown={handleKeyDown}>
             {nodes.length === 0 && (
-                <li className="p-2 text-sm text-gray-500 text-center">No files found.</li>
+                <li className="p-2 text-sm text-gray-500 dark:text-gray-400 text-center">No matching files found.</li>
             )}
             {nodes.sort((a,b) => {
                 if (a.type === 'folder' && b.type === 'file') return -1;
@@ -252,7 +253,7 @@ const CodeViewer: React.FC<{ file: FileType | null }> = ({ file }) => {
     
     if (!file) {
         return (
-            <div className="flex h-full items-center justify-center text-gray-500">
+            <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400">
                 <p>Select a file to view its content</p>
             </div>
         );
@@ -261,18 +262,18 @@ const CodeViewer: React.FC<{ file: FileType | null }> = ({ file }) => {
     const language = getLanguageFromFileName(file.name);
 
     return (
-        <div className="flex flex-col h-full bg-gray-950 rounded-lg">
-            <div className="flex items-center justify-between p-3 border-b border-gray-700">
-                <span className="font-mono text-sm text-gray-300">{file.name}</span>
+        <div className="flex flex-col h-full bg-white dark:bg-gray-950 rounded-lg">
+            <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+                <span className="font-mono text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
                 <button
                     onClick={handleCopy}
-                    className="flex items-center space-x-1.5 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded-md transition-colors text-gray-300"
+                    className="flex items-center space-x-1.5 px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors text-gray-700 dark:text-gray-300"
                 >
-                    {copied ? <CheckIcon className="h-4 w-4 text-green-400" /> : <ClipboardIcon className="h-4 w-4" />}
+                    {copied ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
                     <span>{copied ? 'Copied!' : 'Copy'}</span>
                 </button>
             </div>
-            <div className="flex-grow overflow-auto p-4">
+            <div className="flex-grow overflow-auto p-4 bg-gray-900 text-gray-200">
                  <pre className="text-sm bg-transparent p-0 m-0"><code ref={codeRef} className={`language-${language}`}>{file.content}</code></pre>
             </div>
         </div>
@@ -283,7 +284,7 @@ interface ResultsDisplayProps {
   files: FileNode[];
 }
 
-const filterNodes = (nodes: FileNode[], query: string): FileNode[] => {
+const filterNodesByName = (nodes: FileNode[], query: string): FileNode[] => {
     if (!query.trim()) {
         return nodes;
     }
@@ -295,6 +296,7 @@ const filterNodes = (nodes: FileNode[], query: string): FileNode[] => {
         }
 
         if (node.type === 'folder') {
+            // If folder name matches, include all its children
             if (node.name.toLowerCase().includes(lowerCaseQuery)) {
                 return node;
             }
@@ -314,15 +316,67 @@ const filterNodes = (nodes: FileNode[], query: string): FileNode[] => {
     return nodes.map(filter).filter((n): n is FileNode => n !== null);
 };
 
+const filterNodesByType = (nodes: FileNode[], type: string): FileNode[] => {
+    if (!type) {
+        return nodes;
+    }
+
+    const filter = (node: FileNode): FileNode | null => {
+        if (node.type === 'file') {
+            return node.name.endsWith(`.${type}`) ? node : null;
+        }
+
+        if (node.type === 'folder') {
+            const filteredChildren = node.children
+                .map(filter)
+                .filter((n): n is FileNode => n !== null);
+
+            if (filteredChildren.length > 0) {
+                return { ...node, children: filteredChildren };
+            }
+        }
+
+        return null;
+    };
+
+    return nodes.map(filter).filter((n): n is FileNode => n !== null);
+};
+
+
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
   const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [fileTypeFilter, setFileTypeFilter] = useState('All Types');
   const { expandedFolders, toggleFolder, setExpandedFolders } = useFileTreeState();
 
-  const filteredFiles = useMemo(() => filterNodes(files, searchQuery), [files, searchQuery]);
+  const availableFileTypes = useMemo(() => {
+    const extensions = new Set<string>();
+    const traverse = (nodes: FileNode[]) => {
+      for (const node of nodes) {
+        if (node.type === 'file') {
+          const parts = node.name.split('.');
+          if (parts.length > 1) {
+            const ext = parts.pop();
+            if (ext) extensions.add(ext);
+          }
+        } else {
+          traverse(node.children);
+        }
+      }
+    };
+    traverse(files);
+    return ["All Types", ...Array.from(extensions).sort()];
+  }, [files]);
+
+  const filteredFiles = useMemo(() => {
+      const effectiveTypeFilter = fileTypeFilter === 'All Types' ? '' : fileTypeFilter;
+      const typeFiltered = filterNodesByType(files, effectiveTypeFilter);
+      return filterNodesByName(typeFiltered, searchQuery);
+  }, [files, searchQuery, fileTypeFilter]);
+
 
   useEffect(() => {
-      if (searchQuery) {
+      if (searchQuery || fileTypeFilter !== 'All Types') {
           const allFolderPaths = new Set<string>();
           const findFolders = (nodes: FileNode[], currentPath: string) => {
               nodes.forEach(node => {
@@ -338,7 +392,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
       } else {
           setExpandedFolders(new Set());
       }
-  }, [searchQuery, filteredFiles, setExpandedFolders]);
+  }, [searchQuery, fileTypeFilter, filteredFiles, setExpandedFolders]);
 
   const handleDownloadZip = async () => {
     if (!files || !window.JSZip) {
@@ -380,26 +434,45 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-bold text-white">Generated Project</h3>
+        <h3 className="text-2xl font-bold text-black dark:text-white">Generated Project</h3>
         <button
           onClick={handleDownloadZip}
-          className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500"
+          className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
         >
           <ArrowDownTrayIcon className="h-5 w-5" />
           <span>Download .zip</span>
         </button>
       </div>
-      <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
-        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-900 flex flex-col">
-          <div className="p-2 border-b border-gray-700">
-              <input
-                  type="text"
-                  placeholder="Filter files..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-gray-500"
-                  aria-label="Filter files by name"
-              />
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
+        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-50 dark:bg-gray-900 flex flex-col">
+          <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        placeholder="Filter by name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-gray-500 dark:placeholder-gray-400"
+                        aria-label="Filter files by name"
+                    />
+                     <div className="relative">
+                        <select
+                            value={fileTypeFilter}
+                            onChange={(e) => setFileTypeFilter(e.target.value)}
+                            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm pl-3 pr-8 py-1.5 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none text-gray-800 dark:text-gray-200"
+                            aria-label="Filter by file type"
+                        >
+                            {availableFileTypes.map(type => (
+                                <option key={type} value={type}>
+                                    {type === 'All Types' ? type : `.${type}`}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                    </div>
+                </div>
           </div>
           <div className="p-2 overflow-y-auto flex-grow">
             <FileTreeView

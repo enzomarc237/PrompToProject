@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProjectOptions } from '../types';
 import { STACK_OPTIONS, PATTERN_OPTIONS, AUTH_OPTIONS, TESTING_OPTIONS, INFRA_OPTIONS, DEFAULT_PROJECT_OPTIONS, BACKEND_OPTIONS, FRONTEND_OPTIONS } from '../constants';
 import { SparklesIcon, ChevronDownIcon } from './icons/Icons';
@@ -10,12 +10,12 @@ interface PromptFormProps {
 
 const FormSelect: React.FC<{label: string, value: string | undefined, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[]}> = ({ label, value, onChange, options }) => (
     <div>
-        <label className="block text-sm font-medium text-gray-300">{label}</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
         <div className="relative mt-1">
             <select
                 value={value}
                 onChange={onChange}
-                className="w-full bg-gray-800 border border-gray-600 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none"
+                className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none text-gray-900 dark:text-gray-200"
             >
                 {options.map(option => <option key={option}>{option}</option>)}
             </select>
@@ -52,9 +52,9 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
     }
   }, [options]);
 
-  const handleChange = useCallback((field: keyof ProjectOptions) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (field: keyof ProjectOptions) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
     setOptions(prev => ({ ...prev, [field]: e.target.value }));
-  }, []);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,15 +62,15 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-950/50 p-6 rounded-lg border border-gray-700">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50/50 dark:bg-gray-950/50 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Project Description
         </label>
         <textarea
           id="description"
           rows={5}
-          className="block w-full bg-gray-800 border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-white p-3"
+          className="block w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 dark:text-white p-3"
           value={options.description}
           onChange={handleChange('description')}
           placeholder="Describe your project idea here..."
@@ -99,7 +99,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading })
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-900/50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-500/50 dark:disabled:bg-indigo-900/50 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <>
