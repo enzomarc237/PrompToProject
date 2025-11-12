@@ -239,33 +239,28 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
     const codeRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
-        if (codeRef.current && window.hljs && file) {
-            codeRef.current.textContent = file.content;
-            window.hljs.highlightElement(codeRef.current);
-        }
-    }, [file]);
-
-    useEffect(() => {
         const codeElement = codeRef.current;
-        if (!codeElement) return;
-
-        // Remove previous search highlights
-        const existingMarks = Array.from(codeElement.querySelectorAll('mark.search-highlight'));
-        // FIX: Explicitly type `mark` as Element to prevent TypeScript from inferring it as `unknown`.
-        existingMarks.forEach((mark: Element) => {
-            const parent = mark.parentNode;
-            if (parent) {
-                parent.replaceChild(document.createTextNode(mark.textContent || ''), mark);
-                parent.normalize();
-            }
-        });
-
-        if (!searchQuery.trim() || !file) {
+        if (!codeElement || !window.hljs || !file) {
             return;
         }
 
-        // Apply new search highlights
+        // Fix: Explicitly reset className to remove the 'hljs' class added by the library.
+        // This prevents a bug where highlight.js would skip re-highlighting the content
+        // on subsequent file views, leading to an inconsistent state and a crash.
+        codeElement.className = `language-${getLanguageFromFileName(file.name)}`;
+        
+        // 1. Set content and apply syntax highlighting. This creates a clean slate.
+        codeElement.textContent = file.content;
+        window.hljs.highlightElement(codeElement);
+        
+        // 2. Apply search term highlighting if a query exists.
+        if (!searchQuery.trim()) {
+            return; // No search query, so we're done.
+        }
+
         const regex = new RegExp(searchQuery.trim(), 'gi');
+        
+        // Walk through all text nodes within the now-highlighted code.
         const walker = document.createTreeWalker(codeElement, NodeFilter.SHOW_TEXT);
         const textNodes: Text[] = [];
         while (walker.nextNode()) {
@@ -273,25 +268,43 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
         }
 
         textNodes.forEach(node => {
-            if (!node.textContent) return;
-            const matches = node.textContent.match(regex);
-            if (matches) {
+            if (!node.textContent || !node.parentNode) return;
+            
+            // Skip nodes already inside a mark tag to prevent nesting issues.
+            if (node.parentNode.nodeName === 'MARK') return;
+
+            const matches = [...node.textContent.matchAll(regex)];
+            if (matches.length > 0) {
                 const fragment = document.createDocumentFragment();
-                const parts = node.textContent.split(regex);
-                
-                parts.forEach((part, index) => {
-                    fragment.appendChild(document.createTextNode(part));
-                    if (index < matches.length) {
-                        const mark = document.createElement('mark');
-                        mark.className = 'search-highlight';
-                        mark.textContent = matches[index];
-                        fragment.appendChild(mark);
+                let lastIndex = 0;
+
+                matches.forEach(match => {
+                    const index = match.index ?? 0;
+                    const matchedText = match[0];
+                    
+                    // Add text before the match
+                    if (index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(node.textContent!.substring(lastIndex, index)));
                     }
+
+                    // Add the highlighted match
+                    const mark = document.createElement('mark');
+                    mark.className = 'search-highlight';
+                    mark.textContent = matchedText;
+                    fragment.appendChild(mark);
+
+                    lastIndex = index + matchedText.length;
                 });
-                node.parentNode?.replaceChild(fragment, node);
+
+                // Add any remaining text after the last match
+                if (lastIndex < node.textContent.length) {
+                    fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex)));
+                }
+                
+                node.parentNode.replaceChild(fragment, node);
             }
         });
-    }, [searchQuery, file]);
+    }, [file, searchQuery]);
     
     const handleCopy = () => {
         if (file) {
