@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { FileNode, File as FileType } from '../types';
 import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon, JsIcon, TsIcon, HtmlIcon, CssIcon, JsonIcon, MarkdownIcon, NpmIcon, GitIcon, TailwindIcon, ViteIcon, FlutterIcon, SwiftIcon, KotlinIcon, FirebaseIcon, TagIcon, DocumentTextIcon } from './icons/Icons';
+import ErrorBoundary from './ErrorBoundary';
 
 declare global {
   interface Window {
@@ -490,7 +491,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
           </div>
         </div>
         <div className="w-2/3 flex-grow">
-          <CodeViewer file={selectedFile} searchQuery={searchQuery} />
+          <ErrorBoundary>
+            <CodeViewer file={selectedFile} searchQuery={searchQuery} />
+          </ErrorBoundary>
         </div>
       </div>
     </>
