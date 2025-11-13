@@ -6,10 +6,12 @@ import { ProjectHistory } from './components/ProjectHistory';
 import { SaveProjectDialog } from './components/SaveProjectDialog';
 import { Toast } from './components/Toast';
 import { CodeBracketSquareIcon, SunIcon, MoonIcon } from './components/icons/Icons';
-import { generateProjectStructure } from './services/geminiService';
+import { generateProjectStructure } from './services/generationService';
 import { projectHistoryService } from './services/projectHistoryService';
 import { useAuth } from './contexts/AuthContext';
 import { FileNode, ProjectOptions, SavedProject } from './types';
+import { LLMSettingsProvider } from './contexts/LLMSettingsContext';
+import { Settings } from './components/Settings';
 
 const SkeletonLoader = () => (
     <div className="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex animate-pulse">
@@ -83,6 +85,7 @@ const AppContent: React.FC = () => {
   const [projectOptions, setProjectOptions] = useState<ProjectOptions | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [theme, setTheme] = useState<Theme>(() => {
@@ -110,6 +113,8 @@ const AppContent: React.FC = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  const { settings: llmSettings } = useLLMSettings();
+
   const handleGenerateProject = useCallback(async (options: ProjectOptions) => {
     setIsLoading(true);
     setError(null);
@@ -117,7 +122,7 @@ const AppContent: React.FC = () => {
     setProjectOptions(options);
     setCurrentProjectId(null);
     try {
-      const files = await generateProjectStructure(options);
+      const files = await generateProjectStructure(options, llmSettings);
       setGeneratedFiles(files);
       
       if (user && files && files.length > 0) {
@@ -137,7 +142,7 @@ const AppContent: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, llmSettings]);
 
   const handleSaveProject = useCallback(async (name: string) => {
     if (!user || !generatedFiles || !projectOptions) return;
@@ -209,13 +214,23 @@ const AppContent: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
-              {generatedFiles && (
-                <button
-                  onClick={() => setShowSaveDialog(true)}
-                  className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                  aria-label="Save project"
-                  title="Save Project"
-                >
+               <button
+                 onClick={() => setShowSettings(true)}
+                 className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                 aria-label="LLM settings"
+                 title="LLM Settings"
+               >
+                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-1.14 1.603-1.14 1.902 0l.149.57a1 1 0 00.95.69h.6a1 1 0 01.7.3l.424.425a1 1 0 00.707.293h.6c1.148 0 1.622 1.468.707 2.121l-.49.357a1 1 0 00-.364 1.118l.15.57c.3 1.14-.902 2.087-1.862 1.52l-.518-.298a1 1 0 00-1.094.117l-.424.424a1 1 0 01-.707.293h-.6a1 1 0 00-.95.69l-.149.57c-.3 1.14-1.603 1.14-1.902 0l-.149-.57a1 1 0 00-.95-.69h-.6a1 1 0 01-.7-.3l-.424-.425a1 1 0 00-.707-.293h-.6c-1.148 0-1.622-1.468-.707-2.121l.49-.357a1 1 0 00.364-1.118l-.15-.57c-.3-1.14.902-2.087 1.862-1.52l.518.298a1 1 0 001.094-.117l.424-.424A1 1 0 0110.5 4.187h.6a1 1 0 00.95-.69l.149-.57z" />
+                 </svg>
+               </button>
+               {generatedFiles && (
+                 <button
+                   onClick={() => setShowSaveDialog(true)}
+                   className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                   aria-label="Save project"
+                   title="Save Project"
+                 >
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
@@ -268,7 +283,7 @@ const AppContent: React.FC = () => {
       
       <footer className="bg-white/70 dark:bg-gray-950/70 py-4 border-t border-gray-200 dark:border-gray-800">
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          Powered by Gemini 2.5 Pro
+          Powered by your selected LLM provider
         </div>
       </footer>
 
@@ -279,27 +294,48 @@ const AppContent: React.FC = () => {
         />
       )}
 
-      {showSaveDialog && (
-        <SaveProjectDialog
-          onSave={handleSaveProject}
-          onCancel={() => setShowSaveDialog(false)}
-          defaultName={projectOptions?.description.slice(0, 50) || ''}
-        />
-      )}
+       {showSaveDialog && (
+         <SaveProjectDialog
+           onSave={handleSaveProject}
+           onCancel={() => setShowSaveDialog(false)}
+           defaultName={projectOptions?.description.slice(0, 50) || ''}
+         />
+       )}
 
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-    </div>
-  );
+       {showSettings && (
+         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+           <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-xl max-w-lg w-full mx-4">
+             <div className="flex justify-between items-center mb-3">
+               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">LLM Settings</h3>
+               <button
+                 onClick={() => setShowSettings(false)}
+                 className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
+               >
+                 ✕
+               </button>
+             </div>
+             <Settings />
+           </div>
+         </div>
+       )}
+ 
+       {toast && (
+         <Toast
+           message={toast.message}
+           type={toast.type}
+           onClose={() => setToast(null)}
+         />
+       )}
+     </div>
+   );
 };
 
 const App: React.FC = () => {
-  return <AppContent />;
+  return (
+    <LLMSettingsProvider>
+      <AppContent />
+    </LLMSettingsProvider>
+  );
 };
 
 export default App;

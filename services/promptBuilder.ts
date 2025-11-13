@@ -1,17 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
-import { FileNode, ProjectOptions } from '../types';
+import { ProjectOptions } from "../types";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-// NOTE: This service is deprecated in favor of the provider-agnostic generationService.
-// It is kept temporarily for backwards compatibility and will use the env key if present.
-if (!apiKey) {
-  console.warn("VITE_GEMINI_API_KEY not set. Configure LLM provider via settings.");
-}
-
-const ai = new GoogleGenAI({ apiKey });
-
-const createSystemInstruction = () => {
+export const createSystemInstruction = () => {
   return `You are an expert software architect and senior full-stack engineer. Your task is to act as a "Prompt-to-Project" generator. You will receive a natural language description of a web application, along with optional technical preferences. Based on this input, you must generate a complete, well-structured, and ready-to-run starter project codebase.
 
 Your output MUST be a single, valid JSON object representing an array of file and folder nodes for the project's root directory. Do not add any explanatory text before or after the JSON object.
@@ -28,8 +17,8 @@ Your output MUST be a single, valid JSON object representing an array of file an
 5.  **Comprehensive README:** Generate a detailed \`README.md\` that explains the project, setup instructions, how to run it locally, and an overview of the architecture.`;
 };
 
-const createUserPrompt = (options: ProjectOptions) => {
-  const stackInfo = options.stack === 'Custom'
+export const createUserPrompt = (options: ProjectOptions) => {
+  const stackInfo = options.stack === "Custom"
     ? `- **Custom Stack:**\n  - **Frontend:** ${options.frontend}\n  - **Backend:** ${options.backend}`
     : `- **Stack:** ${options.stack}`;
 
@@ -46,41 +35,4 @@ ${stackInfo}
 - **Infrastructure:** ${options.infra}
 
 Remember to return ONLY the JSON object representing the file structure.`;
-};
-
-export const generateProjectStructure = async (options: ProjectOptions): Promise<FileNode[]> => {
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-09-2025",
-      contents: createUserPrompt(options),
-      config: {
-        systemInstruction: createSystemInstruction(),
-        responseMimeType: "application/json",
-        thinkingConfig: { thinkingBudget: 32768 }
-      },
-    });
-
-    const jsonText = response.text.trim();
-    
-    // Basic validation to ensure we have what looks like an array
-    if (!jsonText.startsWith('[') || !jsonText.endsWith(']')) {
-        throw new Error('Invalid JSON response from API. Expected a root array.');
-    }
-    
-    const parsedJson = JSON.parse(jsonText);
-
-    // Further validation could be added here to check the structure of FileNode
-    if (!Array.isArray(parsedJson)) {
-        throw new Error('Parsed JSON is not an array as expected.');
-    }
-    
-    return parsedJson as FileNode[];
-
-  } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    if (error instanceof Error) {
-        throw new Error(`Failed to generate project structure: ${error.message}`);
-    }
-    throw new Error("An unknown error occurred while communicating with the Gemini API.");
-  }
 };
