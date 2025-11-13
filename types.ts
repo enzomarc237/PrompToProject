@@ -27,15 +27,18 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  createdAt: string;
+  avatar?: string;
+  created?: string;
+  updated?: string;
 }
 
 export interface SavedProject {
   id: string;
-  userId: string;
+  user: string;
   name: string;
+  description?: string;
   options: ProjectOptions;
   files: FileNode[];
-  createdAt: string;
-  updatedAt: string;
+  created?: string;
+  updated?: string;
 }

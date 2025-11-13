@@ -12,19 +12,36 @@ export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, o
   const { user } = useAuth();
   const [projects, setProjects] = useState<SavedProject[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      const userProjects = projectHistoryService.getUserProjects(user.id);
-      setProjects(userProjects);
-    }
+    const loadProjects = async () => {
+      if (user) {
+        try {
+          setIsLoading(true);
+          const userProjects = await projectHistoryService.getUserProjects(user.id);
+          setProjects(userProjects);
+        } catch (error) {
+          console.error('Failed to load projects:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadProjects();
   }, [user]);
 
-  const handleDelete = (projectId: string, e: React.MouseEvent) => {
+  const handleDelete = async (projectId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this project?')) {
-      projectHistoryService.deleteProject(projectId);
-      setProjects(projects.filter(p => p.id !== projectId));
+      try {
+        await projectHistoryService.deleteProject(projectId);
+        setProjects(projects.filter(p => p.id !== projectId));
+      } catch (error) {
+        console.error('Failed to delete project:', error);
+        alert('Failed to delete project. Please try again.');
+      }
     }
   };
 
@@ -78,7 +95,12 @@ export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, o
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {filteredProjects.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading projects...</p>
+              </div>
+            ) : filteredProjects.length === 0 ? (
               <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -112,7 +134,7 @@ export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, o
                         </span>
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-500">
-                        {formatDate(project.createdAt)}
+                        {formatDate(project.created || new Date().toISOString())}
                       </p>
                     </div>
                     <button

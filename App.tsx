@@ -122,7 +122,7 @@ const AppContent: React.FC = () => {
       
       if (user && files && files.length > 0) {
         const projectName = options.description.slice(0, 50).trim() || 'Untitled Project';
-        const savedProject = projectHistoryService.saveProject(
+        const savedProject = await projectHistoryService.saveProject(
           user.id,
           projectName,
           options,
@@ -139,28 +139,36 @@ const AppContent: React.FC = () => {
     }
   }, [user]);
 
-  const handleSaveProject = useCallback((name: string) => {
+  const handleSaveProject = useCallback(async (name: string) => {
     if (!user || !generatedFiles || !projectOptions) return;
     
-    if (currentProjectId) {
-      projectHistoryService.updateProject(currentProjectId, {
-        name,
-        files: generatedFiles,
-        options: projectOptions,
+    try {
+      if (currentProjectId) {
+        await projectHistoryService.updateProject(currentProjectId, {
+          name,
+          files: generatedFiles,
+          options: projectOptions,
+        });
+        setToast({ message: 'Project updated successfully!', type: 'success' });
+      } else {
+        const savedProject = await projectHistoryService.saveProject(
+          user.id,
+          name,
+          projectOptions,
+          generatedFiles
+        );
+        setCurrentProjectId(savedProject.id);
+        setToast({ message: 'Project saved successfully!', type: 'success' });
+      }
+      
+      setShowSaveDialog(false);
+    } catch (err) {
+      console.error(err);
+      setToast({ 
+        message: err instanceof Error ? err.message : 'Failed to save project', 
+        type: 'error' 
       });
-      setToast({ message: 'Project updated successfully!', type: 'success' });
-    } else {
-      const savedProject = projectHistoryService.saveProject(
-        user.id,
-        name,
-        projectOptions,
-        generatedFiles
-      );
-      setCurrentProjectId(savedProject.id);
-      setToast({ message: 'Project saved successfully!', type: 'success' });
     }
-    
-    setShowSaveDialog(false);
   }, [user, generatedFiles, projectOptions, currentProjectId]);
 
   const handleLoadProject = useCallback((project: SavedProject) => {

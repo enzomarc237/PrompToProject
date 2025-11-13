@@ -1,72 +1,136 @@
 import { SavedProject, ProjectOptions, FileNode } from '../types';
-
-const PROJECTS_STORAGE_KEY = 'saved-projects';
+import { pb } from '../lib/pocketbase';
 
 export const projectHistoryService = {
-  saveProject: (
+  saveProject: async (
     userId: string,
     name: string,
     options: ProjectOptions,
     files: FileNode[]
-  ): SavedProject => {
-    const projects = getAllProjects();
-    
-    const newProject: SavedProject = {
-      id: crypto.randomUUID(),
-      userId,
-      name,
-      options,
-      files,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  ): Promise<SavedProject> => {
+    try {
+      const data = {
+        user: userId,
+        name,
+        description: options.description.slice(0, 200),
+        options: JSON.stringify(options),
+        files: JSON.stringify(files),
+      };
 
-    projects.push(newProject);
-    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
-    
-    return newProject;
+      const record = await pb.collection('projects').create(data);
+
+      return {
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to save project');
+    }
   },
 
-  getUserProjects: (userId: string): SavedProject[] => {
-    const projects = getAllProjects();
-    return projects
-      .filter(p => p.userId === userId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  getUserProjects: async (userId: string): Promise<SavedProject[]> => {
+    try {
+      const records = await pb.collection('projects').getFullList({
+        filter: `user = "${userId}"`,
+        sort: '-created',
+      });
+
+      return records.map(record => ({
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      }));
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to fetch projects');
+    }
   },
 
-  getProject: (projectId: string): SavedProject | null => {
-    const projects = getAllProjects();
-    return projects.find(p => p.id === projectId) || null;
+  getProject: async (projectId: string): Promise<SavedProject | null> => {
+    try {
+      const record = await pb.collection('projects').getOne(projectId);
+
+      return {
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch {
+      return null;
+    }
   },
 
-  deleteProject: (projectId: string): void => {
-    const projects = getAllProjects();
-    const filtered = projects.filter(p => p.id !== projectId);
-    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(filtered));
+  deleteProject: async (projectId: string): Promise<void> => {
+    try {
+      await pb.collection('projects').delete(projectId);
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to delete project');
+    }
   },
 
-  updateProject: (projectId: string, updates: Partial<SavedProject>): SavedProject | null => {
-    const projects = getAllProjects();
-    const index = projects.findIndex(p => p.id === projectId);
-    
-    if (index === -1) return null;
-    
-    projects[index] = {
-      ...projects[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-    
-    localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
-    return projects[index];
+  updateProject: async (
+    projectId: string,
+    updates: Partial<SavedProject>
+  ): Promise<SavedProject | null> => {
+    try {
+      const data: any = {};
+      
+      if (updates.name) data.name = updates.name;
+      if (updates.description) data.description = updates.description;
+      if (updates.options) data.options = JSON.stringify(updates.options);
+      if (updates.files) data.files = JSON.stringify(updates.files);
+
+      const record = await pb.collection('projects').update(projectId, data);
+
+      return {
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to update project');
+    }
+  },
+
+  searchProjects: async (userId: string, query: string): Promise<SavedProject[]> => {
+    try {
+      const records = await pb.collection('projects').getFullList({
+        filter: `user = "${userId}" && (name ~ "${query}" || description ~ "${query}")`,
+        sort: '-created',
+      });
+
+      return records.map(record => ({
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      }));
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to search projects');
+    }
   },
 };
-
-function getAllProjects(): SavedProject[] {
-  try {
-    const projectsJson = localStorage.getItem(PROJECTS_STORAGE_KEY);
-    return projectsJson ? JSON.parse(projectsJson) : [];
-  } catch {
-    return [];
-  }
-}

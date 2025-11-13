@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { authService } from '../services/authService';
+import { pb } from '../lib/pocketbase';
 
 interface AuthContextType {
   user: User | null;
@@ -25,9 +26,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-    setIsLoading(false);
+    const initAuth = async () => {
+      const currentUser = authService.getCurrentUser();
+      
+      if (currentUser) {
+        const refreshedUser = await authService.refreshAuth();
+        setUser(refreshedUser);
+      }
+      
+      setIsLoading(false);
+    };
+
+    initAuth();
+
+    const unsubscribe = pb.authStore.onChange((token, model) => {
+      if (model) {
+        setUser({
+          id: model.id,
+          email: model.email,
+          name: model.name,
+          avatar: model.avatar,
+          created: model.created,
+          updated: model.updated,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
