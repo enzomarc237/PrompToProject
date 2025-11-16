@@ -21,7 +21,11 @@ Your output MUST be a single, valid JSON object representing an array of file an
 2.  **Generate High-Quality Code:** Generate idiomatic, high-quality code for each file. The code must be functional, commented where necessary, and follow best practices for the chosen technologies.
 3.  **No Placeholders:** Do not generate placeholder or "TODO" code. Generate real, working sample code that implements a basic version of the requested features. For example, if asked for a task tracker, generate files for a 'Task' model, API endpoints to list/create tasks, and a simple UI to display them.
 4.  **Essential Configs:** Include essential configuration files like \`package.json\` (with relevant dependencies), \`.gitignore\`, \`.env.example\`, and any framework-specific config files (e.g., \`tsconfig.json\`, \`next.config.js\`).
-5.  **Comprehensive README:** Generate a detailed \`README.md\` that explains the project, setup instructions, how to run it locally, and an overview of the architecture.`;
+5.  **Comprehensive README:** Generate a detailed \`README.md\` that includes:
+    - An overview of the project.
+    - Setup and installation instructions.
+    - Instructions on how to run the project locally.
+    - A "How It Works" section detailing the project structure. This section should provide a brief explanation of key files and folders to help the user understand the codebase.`;
 };
 
 const createUserPrompt = (options: ProjectOptions) => {

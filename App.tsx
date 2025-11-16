@@ -1,15 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { PromptForm } from './components/PromptForm';
 import { ResultsDisplay } from './components/ResultsDisplay';
-import { AuthForm } from './components/AuthForm';
-import { ProjectHistory } from './components/ProjectHistory';
-import { SaveProjectDialog } from './components/SaveProjectDialog';
-import { Toast } from './components/Toast';
 import { CodeBracketSquareIcon, SunIcon, MoonIcon } from './components/icons/Icons';
 import { generateProjectStructure } from './services/geminiService';
-import { projectHistoryService } from './services/projectHistoryService';
-import { useAuth } from './contexts/AuthContext';
-import { FileNode, ProjectOptions, SavedProject } from './types';
+import { FileNode, ProjectOptions } from './types';
 
 const SkeletonLoader = () => (
     <div className="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex animate-pulse">
@@ -75,20 +69,16 @@ const GenerationProgress: React.FC<{ details: ProjectOptions }> = ({ details }) 
 
 type Theme = 'light' | 'dark';
 
-const AppContent: React.FC = () => {
-  const { user, logout } = useAuth();
+const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [generatedFiles, setGeneratedFiles] = useState<FileNode[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [projectOptions, setProjectOptions] = useState<ProjectOptions | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
       const savedTheme = window.localStorage.getItem('theme') as Theme;
       if (savedTheme) return savedTheme;
+      // Check user's OS preference
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
         return 'dark';
       }
@@ -115,74 +105,16 @@ const AppContent: React.FC = () => {
     setError(null);
     setGeneratedFiles(null);
     setProjectOptions(options);
-    setCurrentProjectId(null);
     try {
       const files = await generateProjectStructure(options);
       setGeneratedFiles(files);
-      
-      if (user && files && files.length > 0) {
-        const projectName = options.description.slice(0, 50).trim() || 'Untitled Project';
-        const savedProject = await projectHistoryService.saveProject(
-          user.id,
-          projectName,
-          options,
-          files
-        );
-        setCurrentProjectId(savedProject.id);
-        setToast({ message: 'Project saved successfully!', type: 'success' });
-      }
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred. Please check the console.');
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
-
-  const handleSaveProject = useCallback(async (name: string) => {
-    if (!user || !generatedFiles || !projectOptions) return;
-    
-    try {
-      if (currentProjectId) {
-        await projectHistoryService.updateProject(currentProjectId, {
-          name,
-          files: generatedFiles,
-          options: projectOptions,
-        });
-        setToast({ message: 'Project updated successfully!', type: 'success' });
-      } else {
-        const savedProject = await projectHistoryService.saveProject(
-          user.id,
-          name,
-          projectOptions,
-          generatedFiles
-        );
-        setCurrentProjectId(savedProject.id);
-        setToast({ message: 'Project saved successfully!', type: 'success' });
-      }
-      
-      setShowSaveDialog(false);
-    } catch (err) {
-      console.error(err);
-      setToast({ 
-        message: err instanceof Error ? err.message : 'Failed to save project', 
-        type: 'error' 
-      });
-    }
-  }, [user, generatedFiles, projectOptions, currentProjectId]);
-
-  const handleLoadProject = useCallback((project: SavedProject) => {
-    setGeneratedFiles(project.files);
-    setProjectOptions(project.options);
-    setCurrentProjectId(project.id);
-    setShowHistory(false);
-    setError(null);
-    setToast({ message: 'Project loaded successfully!', type: 'info' });
   }, []);
-
-  if (!user) {
-    return <AuthForm />;
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 flex flex-col transition-colors duration-300">
@@ -195,46 +127,13 @@ const AppContent: React.FC = () => {
                 Prompt-to-Project Starter
               </h1>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
-                {user.name}
-              </span>
-              <button
-                onClick={() => setShowHistory(true)}
-                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                aria-label="Project history"
-                title="Project History"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-              {generatedFiles && (
-                <button
-                  onClick={() => setShowSaveDialog(true)}
-                  className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                  aria-label="Save project"
-                  title="Save Project"
-                >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg>
-                </button>
-              )}
-              <button
-                onClick={handleThemeSwitch}
-                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
-              </button>
-              <button
-                onClick={logout}
-                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
+             <button
+              onClick={handleThemeSwitch}
+              className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500 transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </header>
@@ -271,35 +170,8 @@ const AppContent: React.FC = () => {
           Powered by Gemini 2.5 Pro
         </div>
       </footer>
-
-      {showHistory && (
-        <ProjectHistory
-          onLoadProject={handleLoadProject}
-          onClose={() => setShowHistory(false)}
-        />
-      )}
-
-      {showSaveDialog && (
-        <SaveProjectDialog
-          onSave={handleSaveProject}
-          onCancel={() => setShowSaveDialog(false)}
-          defaultName={projectOptions?.description.slice(0, 50) || ''}
-        />
-      )}
-
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
     </div>
   );
-};
-
-const App: React.FC = () => {
-  return <AppContent />;
 };
 
 export default App;
