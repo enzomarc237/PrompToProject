@@ -1,8 +1,7 @@
-// Fix: Corrected the React import to a standard default import to resolve component typing issues.
-import React from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface State {
@@ -19,7 +18,7 @@ class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true };
   }
 
-  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error in a component:", error, errorInfo);
   }
 

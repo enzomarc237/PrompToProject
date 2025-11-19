@@ -84,3 +84,35 @@ export const generateProjectStructure = async (options: ProjectOptions): Promise
     throw new Error("An unknown error occurred while communicating with the Gemini API.");
   }
 };
+
+export const generateCodeSnippet = async (fileContent: string, snippetDescription: string): Promise<string> => {
+      const systemInstruction = `You are an expert code analysis tool. Your task is to extract a specific function, component, or code block from a given file based on a user's description.
+You MUST return ONLY the raw code snippet requested.
+Do not include any markdown formatting (like \`\`\`typescript), explanations, or any introductory text like "Here is the code snippet:".
+Your output should be immediately usable as a piece of code.`;
+
+      const userPrompt = `Here is the full file content:
+---
+${fileContent}
+---
+
+Please extract the code for the following part: "${snippetDescription}"`;
+
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash", // Use flash for speed
+          contents: userPrompt,
+          config: {
+            systemInstruction: systemInstruction,
+            responseMimeType: "text/plain",
+          },
+        });
+        return response.text.trim();
+      } catch (error) {
+        console.error("Error calling Gemini API for snippet generation:", error);
+        if (error instanceof Error) {
+            throw new Error(`Failed to generate code snippet: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred while generating the code snippet.");
+      }
+    };

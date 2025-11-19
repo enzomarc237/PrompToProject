@@ -80,6 +80,11 @@ export const DocumentTextIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props)
   </svg>
 );
 
+export const ScissorsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7.875 14.25l1.214 1.214a.75.75 0 0 0 1.06 0l4.286-4.286a.75.75 0 0 1 1.06 0l1.214 1.214M6.161 16.03a3.75 3.75 0 1 1 5.303 5.303 3.75 3.75 0 0 1-5.303-5.303Zm0 0l-1.414-1.414a.75.75 0 0 0-1.06 0L.97 17.834a.75.75 0 0 0 0 1.06l1.213 1.213c.293.293.768.293 1.06 0l2.91-2.91Zm11.314-11.314a3.75 3.75 0 1 1-5.303-5.303 3.75 3.75 0 0 1 5.303 5.303Zm0 0l1.414 1.414a.75.75 0 0 0 1.06 0l2.216-2.216a.75.75 0 0 0 0-1.06l-1.213-1.213a.75.75 0 0 0-1.06 0l-2.91 2.91Z" />
+  </svg>
+);
 
 // File Type Icons
 const FileTypeIconWrapper: React.FC<{ children: React.ReactNode } & React.SVGProps<SVGSVGElement>> = ({ children, ...props }) => (
