@@ -73,9 +73,32 @@ export const authService = {
     };
   },
 
-  updateUser: async (userId: string, data: Partial<User>): Promise<User> => {
+  updateUser: async (userId: string, data: Partial<{ name: string; email: string; avatar?: File }>): Promise<User> => {
     try {
-      const record = await pb.collection('users').update(userId, data);
+      const payload: Record<string, any> = {};
+      
+      if (data.name !== undefined) payload.name = data.name;
+      if (data.email !== undefined) payload.email = data.email;
+      
+      if (data.avatar) {
+        const formData = new FormData();
+        if (data.name !== undefined) formData.append('name', data.name);
+        if (data.email !== undefined) formData.append('email', data.email);
+        formData.append('avatar', data.avatar);
+        
+        const record = await pb.collection('users').update(userId, formData);
+        
+        return {
+          id: record.id,
+          email: record.email,
+          name: record.name,
+          avatar: record.avatar,
+          created: record.created,
+          updated: record.updated,
+        };
+      }
+      
+      const record = await pb.collection('users').update(userId, payload);
       
       return {
         id: record.id,
