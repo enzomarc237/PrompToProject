@@ -13,9 +13,9 @@ export const projectHistoryService = {
       const data = {
         user: userId,
         name,
-        description: options.description.slice(0, 200),
-        options: JSON.stringify(options),
-        files: JSON.stringify(files),
+        description: options.description.slice(0, 500),
+        options,
+        files,
       };
 
       const record = await pb.collection('projects').create(data);
@@ -25,8 +25,8 @@ export const projectHistoryService = {
         user: record.user,
         name: record.name,
         description: record.description,
-        options: JSON.parse(record.options),
-        files: JSON.parse(record.files),
+        options: record.options as ProjectOptions,
+        files: record.files as FileNode[],
         created: record.created,
         updated: record.updated,
       };
@@ -47,8 +47,8 @@ export const projectHistoryService = {
         user: record.user,
         name: record.name,
         description: record.description,
-        options: JSON.parse(record.options),
-        files: JSON.parse(record.files),
+        options: record.options as ProjectOptions,
+        files: record.files as FileNode[],
         created: record.created,
         updated: record.updated,
       }));
@@ -66,8 +66,8 @@ export const projectHistoryService = {
         user: record.user,
         name: record.name,
         description: record.description,
-        options: JSON.parse(record.options),
-        files: JSON.parse(record.files),
+        options: record.options as ProjectOptions,
+        files: record.files as FileNode[],
         created: record.created,
         updated: record.updated,
       };
@@ -93,8 +93,8 @@ export const projectHistoryService = {
       
       if (updates.name) data.name = updates.name;
       if (updates.description) data.description = updates.description;
-      if (updates.options) data.options = JSON.stringify(updates.options);
-      if (updates.files) data.files = JSON.stringify(updates.files);
+      if (updates.options) data.options = updates.options;
+      if (updates.files) data.files = updates.files;
 
       const record = await pb.collection('projects').update(projectId, data);
 
@@ -103,8 +103,8 @@ export const projectHistoryService = {
         user: record.user,
         name: record.name,
         description: record.description,
-        options: JSON.parse(record.options),
-        files: JSON.parse(record.files),
+        options: record.options as ProjectOptions,
+        files: record.files as FileNode[],
         created: record.created,
         updated: record.updated,
       };
@@ -125,8 +125,8 @@ export const projectHistoryService = {
         user: record.user,
         name: record.name,
         description: record.description,
-        options: JSON.parse(record.options),
-        files: JSON.parse(record.files),
+        options: record.options as ProjectOptions,
+        files: record.files as FileNode[],
         created: record.created,
         updated: record.updated,
       }));
