@@ -54,8 +54,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     });
 
+    let refreshTimer: number | undefined;
+
+    const scheduleRefresh = () => {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      
+      const token = pb.authStore.token;
+      if (!token) return;
+      
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiresAt = payload.exp * 1000;
+        const now = Date.now();
+        const refreshAt = expiresAt - 60000;
+        
+        if (refreshAt > now) {
+          refreshTimer = window.setTimeout(async () => {
+            try {
+              await authService.refreshAuth();
+              scheduleRefresh();
+            } catch {
+              pb.authStore.clear();
+              setUser(null);
+            }
+          }, refreshAt - now);
+        }
+      } catch {
+        // Invalid token, ignore
+      }
+    };
+
+    scheduleRefresh();
+
     return () => {
       unsubscribe();
+      if (refreshTimer) clearTimeout(refreshTimer);
     };
   }, []);
 
