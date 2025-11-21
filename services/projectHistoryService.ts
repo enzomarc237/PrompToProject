@@ -35,14 +35,14 @@ export const projectHistoryService = {
     }
   },
 
-  getUserProjects: async (userId: string): Promise<SavedProject[]> => {
+  getUserProjects: async (userId: string, page = 1, perPage = 50): Promise<SavedProject[]> => {
     try {
-      const records = await pb.collection('projects').getFullList({
+      const records = await pb.collection('projects').getList(page, perPage, {
         filter: `user = "${escapeFilter(userId)}"`,
         sort: '-created',
       });
 
-      return records.map(record => ({
+      return records.items.map(record => ({
         id: record.id,
         user: record.user,
         name: record.name,
@@ -113,14 +113,14 @@ export const projectHistoryService = {
     }
   },
 
-  searchProjects: async (userId: string, query: string): Promise<SavedProject[]> => {
+  searchProjects: async (userId: string, query: string, page = 1, perPage = 50): Promise<SavedProject[]> => {
     try {
-      const records = await pb.collection('projects').getFullList({
+      const records = await pb.collection('projects').getList(page, perPage, {
         filter: `user = "${escapeFilter(userId)}" && (name ~ "${escapeFilter(query)}" || description ~ "${escapeFilter(query)}")`,
         sort: '-created',
       });
 
-      return records.map(record => ({
+      return records.items.map(record => ({
         id: record.id,
         user: record.user,
         name: record.name,
