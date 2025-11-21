@@ -1,5 +1,6 @@
 import { SavedProject, ProjectOptions, FileNode } from '../types';
 import { pb } from '../lib/pocketbase';
+import { escapeFilter } from '../lib/utils';
 
 export const projectHistoryService = {
   saveProject: async (
@@ -37,7 +38,7 @@ export const projectHistoryService = {
   getUserProjects: async (userId: string): Promise<SavedProject[]> => {
     try {
       const records = await pb.collection('projects').getFullList({
-        filter: `user = "${userId}"`,
+        filter: `user = "${escapeFilter(userId)}"`,
         sort: '-created',
       });
 
@@ -115,7 +116,7 @@ export const projectHistoryService = {
   searchProjects: async (userId: string, query: string): Promise<SavedProject[]> => {
     try {
       const records = await pb.collection('projects').getFullList({
-        filter: `user = "${userId}" && (name ~ "${query}" || description ~ "${query}")`,
+        filter: `user = "${escapeFilter(userId)}" && (name ~ "${escapeFilter(query)}" || description ~ "${escapeFilter(query)}")`,
         sort: '-created',
       });
 

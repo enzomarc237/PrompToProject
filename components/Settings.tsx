@@ -16,6 +16,18 @@ export const Settings: React.FC = () => {
       setLoadingModels(true);
       setError(null);
       try {
+        // Only require an API key for the currently selected provider
+        const hasKey =
+          (settings.provider === LLMProvider.GEMINI && (settings.gemini?.apiKey || import.meta.env.VITE_GEMINI_API_KEY)) ||
+          (settings.provider === LLMProvider.OPENAI && (settings.openai?.apiKey || import.meta.env.VITE_OPENAI_API_KEY)) ||
+          (settings.provider === LLMProvider.OPENROUTER && (settings.openrouter?.apiKey || import.meta.env.VITE_OPENROUTER_API_KEY));
+
+        if (!hasKey) {
+          setError("Set an API key for the selected provider to load models.");
+          setModels([]);
+          return;
+        }
+
         const client = createLLMClient(settings);
         const list = await client.listModels();
         setModels(list.map((m) => m.id));
@@ -31,6 +43,7 @@ export const Settings: React.FC = () => {
         setLoadingModels(false);
       }
     };
+
 
     loadModels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,6 +142,27 @@ export const Settings: React.FC = () => {
           }
           className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
           placeholder="Enter API key (stored locally in your browser)"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Max tokens
+        </label>
+        <input
+          type="number"
+          min={512}
+          max={32768}
+          step={256}
+          value={settings.maxTokens ?? 4096}
+          onChange={(e) => {
+            const v = parseInt(e.target.value, 10);
+            setSettings((prev) => ({
+              ...prev,
+              maxTokens: Number.isFinite(v) ? v : prev.maxTokens,
+            }));
+          }}
+          className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
         />
       </div>
 

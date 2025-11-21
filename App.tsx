@@ -10,7 +10,7 @@ import { generateProjectStructure } from './services/generationService';
 import { projectHistoryService } from './services/projectHistoryService';
 import { useAuth } from './contexts/AuthContext';
 import { FileNode, ProjectOptions, SavedProject } from './types';
-import { LLMSettingsProvider } from './contexts/LLMSettingsContext';
+import { LLMSettingsProvider, useLLMSettings } from './contexts/LLMSettingsContext';
 import { Settings } from './components/Settings';
 
 const SkeletonLoader = () => (

@@ -27,3 +27,4 @@ pocketbase
 *.njsproj
 *.sln
 *.sw?
+.env

@@ -53,10 +53,11 @@ class GeminiClient implements LLMClient {
     ];
   }
 
-  async generate({
+   async generate({
     prompt,
     systemInstruction,
     model = "gemini-2.5-flash-preview-09-2025",
+    maxTokens,
   }: LLMClientGenerateOptions): Promise<string> {
     const response = await this.client.models.generateContent({
       model,
@@ -64,6 +65,7 @@ class GeminiClient implements LLMClient {
       config: {
         systemInstruction,
         responseMimeType: "application/json",
+        maxOutputTokens: maxTokens,
         thinkingConfig: { thinkingBudget: 32768 },
       },
     });
@@ -219,6 +221,7 @@ class OpenRouterClient implements LLMClient {
 
 export interface LLMRuntimeSettings {
   provider: LLMProvider;
+  maxTokens?: number;
   gemini?: { apiKey?: string; model?: string };
   openai?: { apiKey?: string; model?: string };
   openrouter?: { apiKey?: string; model?: string };
@@ -227,6 +230,7 @@ export interface LLMRuntimeSettings {
 export function getDefaultRuntimeSettings(): LLMRuntimeSettings {
   return {
     provider: LLMProvider.GEMINI,
+    maxTokens: 4096,
     gemini: {
       apiKey: GEMINI_API_KEY,
       model: "gemini-2.5-flash-preview-09-2025",
