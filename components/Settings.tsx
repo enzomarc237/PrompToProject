@@ -36,7 +36,7 @@ export const Settings: React.FC = () => {
         setError(
           e instanceof Error
             ? e.message
-            : "Failed to load models for selected provider.",
+            : "Failed to load models. Please check your API key and try again.",
         );
         setModels([]);
       } finally {
@@ -106,103 +106,112 @@ export const Settings: React.FC = () => {
         : settings.openrouter?.apiKey;
 
   return (
-    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        LLM Settings
-      </h2>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Provider
-        </label>
-        <select
-          value={activeProvider}
-          onChange={handleProviderChange}
-          className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-        >
-          <option value={LLMProvider.GEMINI}>Gemini</option>
-          <option value={LLMProvider.OPENAI}>OpenAI</option>
-          <option value={LLMProvider.OPENROUTER}>OpenRouter</option>
-        </select>
+    <div className="space-y-6">
+      <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Configure your LLM provider to generate projects. API keys are stored locally in your browser.
+        </p>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {activeProvider === LLMProvider.GEMINI
-            ? "Gemini API Key"
-            : activeProvider === LLMProvider.OPENAI
-              ? "OpenAI API Key"
-              : "OpenRouter API Key"}
-        </label>
-        <input
-          type="password"
-          value={currentApiKey || ""}
-          onChange={(e) =>
-            handleApiKeyChange(activeProvider, e.target.value)
-          }
-          className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-          placeholder="Enter API key (stored locally in your browser)"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Max tokens
-        </label>
-        <input
-          type="number"
-          min={512}
-          max={32768}
-          step={256}
-          value={settings.maxTokens ?? 4096}
-          onChange={(e) => {
-            const v = parseInt(e.target.value, 10);
-            setSettings((prev) => ({
-              ...prev,
-              maxTokens: Number.isFinite(v) ? v : prev.maxTokens,
-            }));
-          }}
-          className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Model
-        </label>
-        {loadingModels ? (
-          <div className="text-xs text-gray-500">Loading models...</div>
-        ) : error ? (
-          <div className="text-xs text-red-500">
-            {error}
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Provider
+          </label>
+          <div className="relative">
+            <select
+              value={activeProvider}
+              onChange={handleProviderChange}
+              className="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5"
+            >
+              <option value={LLMProvider.GEMINI}>Google Gemini</option>
+              <option value={LLMProvider.OPENAI}>OpenAI</option>
+              <option value={LLMProvider.OPENROUTER}>OpenRouter</option>
+            </select>
           </div>
-        ) : models.length > 0 ? (
-          <select
-            value={currentModel || ""}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            {activeProvider === LLMProvider.GEMINI
+              ? "Gemini API Key"
+              : activeProvider === LLMProvider.OPENAI
+                ? "OpenAI API Key"
+                : "OpenRouter API Key"}
+          </label>
+          <input
+            type="password"
+            value={currentApiKey || ""}
             onChange={(e) =>
-              handleModelChange(activeProvider, e.target.value)
+              handleApiKeyChange(activeProvider, e.target.value)
             }
-            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-          >
-            <option value="">Select a model</option>
-            {models.map((id) => (
-              <option key={id} value={id}>
-                {id}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <div className="text-xs text-gray-500">
-            No models available. Check your API key.
-          </div>
-        )}
-      </div>
+            className="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5"
+            placeholder="sk-..."
+          />
+        </div>
 
-      <p className="text-[10px] text-gray-500">
-        API keys are stored only in your browser (localStorage) and used
-        directly from the frontend. PocketBase is used only for
-        authentication and project storage.
-      </p>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Model
+          </label>
+          {loadingModels ? (
+            <div className="flex items-center space-x-2 text-sm text-gray-500 py-2">
+              <svg className="animate-spin h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Fetching models...</span>
+            </div>
+          ) : error ? (
+            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-800">
+              {error}
+            </div>
+          ) : models.length > 0 ? (
+            <select
+              value={currentModel || ""}
+              onChange={(e) =>
+                handleModelChange(activeProvider, e.target.value)
+              }
+              className="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5"
+            >
+              <option value="">Select a model</option>
+              {models.map((id) => (
+                <option key={id} value={id}>
+                  {id}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="text-sm text-gray-500 italic py-2">
+              Enter a valid API key to load available models.
+            </div>
+          )}
+        </div>
+
+        <div>
+          <div className="flex justify-between">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Max Tokens
+            </label>
+            <span className="text-xs text-gray-500">{settings.maxTokens ?? 4096}</span>
+          </div>
+          <input
+            type="range"
+            min={512}
+            max={32768}
+            step={256}
+            value={settings.maxTokens ?? 4096}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              setSettings((prev) => ({
+                ...prev,
+                maxTokens: Number.isFinite(v) ? v : prev.maxTokens,
+              }));
+            }}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+          />
+        </div>
+      </div>
     </div>
   );
 };

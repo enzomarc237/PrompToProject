@@ -28,7 +28,7 @@ export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, o
         }
       }
     };
-    
+
     loadProjects();
   }, [user]);
 
@@ -67,9 +67,9 @@ export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, o
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-transform">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+
+      <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-transform animate-slide-in-right">
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-4">
@@ -84,7 +84,7 @@ export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, o
                 </svg>
               </button>
             </div>
-            
+
             <input
               type="text"
               placeholder="Search projects..."

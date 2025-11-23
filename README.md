@@ -111,6 +111,7 @@ Visit http://localhost:3000
 - The admin UI is at http://127.0.0.1:8090/_/
 - All API endpoints are at http://127.0.0.1:8090/api/
 - Check [pocketbase_schema.md](./pocketbase_schema.md) for database schema details
+- See [POCKETBASE_SECURITY.md](./POCKETBASE_SECURITY.md) for security configuration and best practices
 
 ## Troubleshooting
 

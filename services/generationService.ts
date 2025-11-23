@@ -28,7 +28,12 @@ export const generateProjectStructure = async (
     maxTokens: llmSettings.maxTokens ?? 4096,
   });
 
-  const jsonText = raw.trim();
+  let jsonText = raw.trim();
+
+  // Remove markdown code blocks if present
+  if (jsonText.includes("```")) {
+    jsonText = jsonText.replace(/```json\n?|```/g, "").trim();
+  }
 
   if (!jsonText.startsWith("[") || !jsonText.endsWith("]")) {
     throw new Error("Invalid JSON response from API. Expected a root array.");

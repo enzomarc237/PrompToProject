@@ -6,10 +6,10 @@ interface SaveProjectDialogProps {
   defaultName?: string;
 }
 
-export const SaveProjectDialog: React.FC<SaveProjectDialogProps> = ({ 
-  onSave, 
-  onCancel, 
-  defaultName = '' 
+export const SaveProjectDialog: React.FC<SaveProjectDialogProps> = ({
+  onSave,
+  onCancel,
+  defaultName = ''
 }) => {
   const [name, setName] = useState(defaultName);
 
@@ -23,7 +23,7 @@ export const SaveProjectDialog: React.FC<SaveProjectDialogProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+        <div className="fixed inset-0 transition-opacity bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onCancel} />
 
         <div className="inline-block align-bottom bg-white dark:bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <form onSubmit={handleSubmit}>

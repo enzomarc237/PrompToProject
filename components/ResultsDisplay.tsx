@@ -4,47 +4,47 @@ import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, Chev
 import ErrorBoundary from './ErrorBoundary';
 
 declare global {
-  interface Window {
-    JSZip: any;
-    hljs: any;
-  }
+    interface Window {
+        JSZip: any;
+        hljs: any;
+    }
 }
 
 const getLanguageFromFileName = (fileName: string): string => {
-  if (fileName.toLowerCase() === 'dockerfile') return 'dockerfile';
-  const extension = fileName.split('.').pop()?.toLowerCase();
-  switch (extension) {
-    case 'js':
-    case 'jsx':
-      return 'javascript';
-    case 'ts':
-    case 'tsx':
-      return 'typescript';
-    case 'py':
-      return 'python';
-    case 'dart':
-      return 'dart';
-    case 'swift':
-      return 'swift';
-    case 'kt':
-    case 'kts':
-      return 'kotlin';
-    case 'html':
-      return 'xml'; // highlight.js uses 'xml' for html
-    case 'css':
-      return 'css';
-    case 'json':
-      return 'json';
-    case 'md':
-      return 'markdown';
-    case 'sh':
-      return 'bash';
-    case 'yml':
-    case 'yaml':
-      return 'yaml';
-    default:
-      return 'plaintext';
-  }
+    if (fileName.toLowerCase() === 'dockerfile') return 'dockerfile';
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+        case 'js':
+        case 'jsx':
+            return 'javascript';
+        case 'ts':
+        case 'tsx':
+            return 'typescript';
+        case 'py':
+            return 'python';
+        case 'dart':
+            return 'dart';
+        case 'swift':
+            return 'swift';
+        case 'kt':
+        case 'kts':
+            return 'kotlin';
+        case 'html':
+            return 'xml'; // highlight.js uses 'xml' for html
+        case 'css':
+            return 'css';
+        case 'json':
+            return 'json';
+        case 'md':
+            return 'markdown';
+        case 'sh':
+            return 'bash';
+        case 'yml':
+        case 'yaml':
+            return 'yaml';
+        default:
+            return 'plaintext';
+    }
 };
 
 const getFileIconComponent = (fileName: string): React.FC<React.SVGProps<SVGSVGElement>> => {
@@ -54,7 +54,7 @@ const getFileIconComponent = (fileName: string): React.FC<React.SVGProps<SVGSVGE
     if (fileName.includes('vite.config')) return ViteIcon;
     if (fileName === 'firebase.json' || fileName === '.firebaserc') return FirebaseIcon;
     if (fileName === 'pubspec.yaml') return FlutterIcon;
-    
+
     const extension = fileName.split('.').pop()?.toLowerCase();
     switch (extension) {
         case 'js':
@@ -130,7 +130,7 @@ const TreeNode: React.FC<{
                 </button>
                 {isExpanded && (
                     <ul role="group">
-                        {node.children.sort((a,b) => {
+                        {node.children.sort((a, b) => {
                             if (a.type === 'folder' && b.type === 'file') return -1;
                             if (a.type === 'file' && b.type === 'folder') return 1;
                             return a.name.localeCompare(b.name);
@@ -156,11 +156,11 @@ const TreeNode: React.FC<{
     const isSelected = selectedFile?.name === node.name && selectedFile?.content === node.content;
     return (
         <li style={{ paddingLeft: `${(level * 1.25)}rem` }}>
-             <button 
-                onClick={() => onSelectFile(node)} 
+            <button
+                onClick={() => onSelectFile(node)}
                 className={`w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors ${isSelected ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-200 dark:focus:bg-gray-700/50`}
                 role="treeitem"
-             >
+            >
                 <FileIconComponent className="h-5 w-5 flex-shrink-0 ml-4" />
                 <span>{node.name}</span>
             </button>
@@ -213,7 +213,7 @@ const FileTreeView: React.FC<{
             {nodes.length === 0 && (
                 <li className="p-2 text-sm text-gray-500 dark:text-gray-400 text-center">No matching files found.</li>
             )}
-            {nodes.sort((a,b) => {
+            {nodes.sort((a, b) => {
                 if (a.type === 'folder' && b.type === 'file') return -1;
                 if (a.type === 'file' && b.type === 'folder') return 1;
                 return a.name.localeCompare(b.name);
@@ -248,18 +248,19 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
         // This prevents a bug where highlight.js would skip re-highlighting the content
         // on subsequent file views, leading to an inconsistent state and a crash.
         codeElement.className = `language-${getLanguageFromFileName(file.name)}`;
-        
+        delete codeElement.dataset.highlighted;
+
         // 1. Set content and apply syntax highlighting. This creates a clean slate.
         codeElement.textContent = file.content;
         window.hljs.highlightElement(codeElement);
-        
+
         // 2. Apply search term highlighting if a query exists.
         if (!searchQuery.trim()) {
             return; // No search query, so we're done.
         }
 
         const regex = new RegExp(searchQuery.trim(), 'gi');
-        
+
         // Walk through all text nodes within the now-highlighted code.
         const walker = document.createTreeWalker(codeElement, NodeFilter.SHOW_TEXT);
         const textNodes: Text[] = [];
@@ -269,7 +270,7 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
 
         textNodes.forEach(node => {
             if (!node.textContent || !node.parentNode) return;
-            
+
             // Skip nodes already inside a mark tag to prevent nesting issues.
             if (node.parentNode.nodeName === 'MARK') return;
 
@@ -281,7 +282,7 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
                 matches.forEach(match => {
                     const index = match.index ?? 0;
                     const matchedText = match[0];
-                    
+
                     // Add text before the match
                     if (index > lastIndex) {
                         fragment.appendChild(document.createTextNode(node.textContent!.substring(lastIndex, index)));
@@ -300,12 +301,12 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
                 if (lastIndex < node.textContent.length) {
                     fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex)));
                 }
-                
+
                 node.parentNode.replaceChild(fragment, node);
             }
         });
     }, [file, searchQuery]);
-    
+
     const handleCopy = () => {
         if (file) {
             navigator.clipboard.writeText(file.content);
@@ -313,7 +314,7 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
             setTimeout(() => setCopied(false), 2000);
         }
     };
-    
+
     if (!file) {
         return (
             <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400">
@@ -337,14 +338,14 @@ const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ 
                 </button>
             </div>
             <div className="flex-grow overflow-auto p-4 bg-gray-900 text-gray-200">
-                 <pre className="text-sm bg-transparent p-0 m-0"><code ref={codeRef} className={`language-${language}`}>{file.content}</code></pre>
+                <pre className="text-sm bg-transparent p-0 m-0"><code ref={codeRef} className={`language-${language}`}>{file.content}</code></pre>
             </div>
         </div>
     );
 };
 
 interface ResultsDisplayProps {
-  files: FileNode[];
+    files: FileNode[];
 }
 
 const filterNodes = (nodes: FileNode[], query: string, searchInName: boolean, searchInContent: boolean): FileNode[] => {
@@ -382,133 +383,88 @@ const filterNodes = (nodes: FileNode[], query: string, searchInName: boolean, se
 
 
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
-  const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchInName, setSearchInName] = useState(true);
-  const [searchInContent, setSearchInContent] = useState(false);
-  const { expandedFolders, toggleFolder, setExpandedFolders } = useFileTreeState();
+    const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchInName, setSearchInName] = useState(true);
+    const [searchInContent, setSearchInContent] = useState(false);
+    const { expandedFolders, toggleFolder, setExpandedFolders } = useFileTreeState();
 
-  const filteredFiles = useMemo(() => {
-      return filterNodes(files, searchQuery, searchInName, searchInContent);
-  }, [files, searchQuery, searchInName, searchInContent]);
+    const filteredFiles = useMemo(() => {
+        return filterNodes(files, searchQuery, searchInName, searchInContent);
+    }, [files, searchQuery, searchInName, searchInContent]);
 
 
-  useEffect(() => {
-      if (searchQuery) {
-          const allFolderPaths = new Set<string>();
-          const findFolders = (nodes: FileNode[], currentPath: string) => {
-              nodes.forEach(node => {
-                  const path = currentPath ? `${currentPath}/${node.name}` : node.name;
-                  if (node.type === 'folder') {
-                      allFolderPaths.add(path);
-                      findFolders(node.children, path);
-                  }
-              });
-          };
-          findFolders(filteredFiles, '');
-          setExpandedFolders(allFolderPaths);
-      } else {
-          // Collapse all folders when search is cleared
-          setExpandedFolders(new Set());
-      }
-  }, [searchQuery, searchInName, searchInContent, filteredFiles, setExpandedFolders]);
+    useEffect(() => {
+        if (searchQuery) {
+            const allFolderPaths = new Set<string>();
+            const findFolders = (nodes: FileNode[], currentPath: string) => {
+                nodes.forEach(node => {
+                    const path = currentPath ? `${currentPath}/${node.name}` : node.name;
+                    if (node.type === 'folder') {
+                        allFolderPaths.add(path);
+                        findFolders(node.children, path);
+                    }
+                });
+            };
+            findFolders(filteredFiles, '');
+            setExpandedFolders(allFolderPaths);
+        } else {
+            // Collapse all folders when search is cleared
+            setExpandedFolders(new Set());
+        }
+    }, [searchQuery, searchInName, searchInContent, filteredFiles, setExpandedFolders]);
 
-  const handleDownloadZip = async () => {
-    if (!files || !window.JSZip) {
-        console.error("Files not available or JSZip not loaded.");
-        return;
-    }
 
-    const zip = new window.JSZip();
 
-    const addFilesToZip = (zipFolder: any, nodes: FileNode[]) => {
-        nodes.forEach(node => {
-            if (node.type === 'folder') {
-                const newFolder = zipFolder.folder(node.name);
-                if (node.children.length > 0) {
-                    addFilesToZip(newFolder, node.children);
-                }
-            } else {
-                zipFolder.file(node.name, node.content);
-            }
-        });
-    };
-    
-    addFilesToZip(zip, files);
-
-    try {
-        const blob = await zip.generateAsync({ type: 'blob' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'project.zip';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-    } catch (e) {
-        console.error("Error generating zip file:", e);
-    }
-  };
-
-  return (
-    <>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-bold text-black dark:text-white">Generated Project</h3>
-        <button
-          onClick={handleDownloadZip}
-          className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
-        >
-          <ArrowDownTrayIcon className="h-5 w-5" />
-          <span>Download .zip</span>
-        </button>
-      </div>
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
-        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-50 dark:bg-gray-900 flex flex-col">
-          <div className="p-2 border-b border-gray-200 dark:border-gray-700 space-y-2">
-                <input
-                    type="text"
-                    placeholder="Search files..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-gray-500 dark:placeholder-gray-400"
-                    aria-label="Filter files"
-                />
-                <div className="flex items-center justify-end space-x-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Search in:</span>
-                    <button 
-                        onClick={() => setSearchInName(prev => !prev)}
-                        className={`p-1.5 rounded-md transition-colors ${searchInName ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
-                        aria-pressed={searchInName}
-                        title="Search in file name"
-                    >
-                        <TagIcon className="h-4 w-4" />
-                    </button>
-                    <button 
-                        onClick={() => setSearchInContent(prev => !prev)}
-                        className={`p-1.5 rounded-md transition-colors ${searchInContent ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
-                        aria-pressed={searchInContent}
-                        title="Search in file content"
-                    >
-                        <DocumentTextIcon className="h-4 w-4" />
-                    </button>
+    return (
+        <>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
+                <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-50 dark:bg-gray-900 flex flex-col">
+                    <div className="p-2 border-b border-gray-200 dark:border-gray-700 space-y-2">
+                        <input
+                            type="text"
+                            placeholder="Search files..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-gray-500 dark:placeholder-gray-400"
+                            aria-label="Filter files"
+                        />
+                        <div className="flex items-center justify-end space-x-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Search in:</span>
+                            <button
+                                onClick={() => setSearchInName(prev => !prev)}
+                                className={`p-1.5 rounded-md transition-colors ${searchInName ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
+                                aria-pressed={searchInName}
+                                title="Search in file name"
+                            >
+                                <TagIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={() => setSearchInContent(prev => !prev)}
+                                className={`p-1.5 rounded-md transition-colors ${searchInContent ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
+                                aria-pressed={searchInContent}
+                                title="Search in file content"
+                            >
+                                <DocumentTextIcon className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-2 overflow-y-auto flex-grow">
+                        <FileTreeView
+                            nodes={filteredFiles}
+                            onSelectFile={setSelectedFile}
+                            selectedFile={selectedFile}
+                            expandedFolders={expandedFolders}
+                            toggleFolder={toggleFolder}
+                        />
+                    </div>
                 </div>
-          </div>
-          <div className="p-2 overflow-y-auto flex-grow">
-            <FileTreeView
-                nodes={filteredFiles}
-                onSelectFile={setSelectedFile}
-                selectedFile={selectedFile}
-                expandedFolders={expandedFolders}
-                toggleFolder={toggleFolder}
-            />
-          </div>
-        </div>
-        <div className="w-2/3 flex-grow">
-          <ErrorBoundary>
-            <CodeViewer file={selectedFile} searchQuery={searchQuery} />
-          </ErrorBoundary>
-        </div>
-      </div>
-    </>
-  );
+                <div className="w-2/3 flex-grow">
+                    <ErrorBoundary>
+                        <CodeViewer file={selectedFile} searchQuery={searchQuery} />
+                    </ErrorBoundary>
+                </div>
+            </div>
+        </>
+    );
 };

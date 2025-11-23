@@ -5,75 +5,17 @@ import { AuthForm } from './components/AuthForm';
 import { ProjectHistory } from './components/ProjectHistory';
 import { SaveProjectDialog } from './components/SaveProjectDialog';
 import { Toast } from './components/Toast';
-import { CodeBracketSquareIcon, SunIcon, MoonIcon } from './components/icons/Icons';
+import { CodeBracketSquareIcon, SunIcon, MoonIcon, ArrowDownTrayIcon } from './components/icons/Icons';
 import { generateProjectStructure } from './services/generationService';
 import { projectHistoryService } from './services/projectHistoryService';
 import { useAuth } from './contexts/AuthContext';
 import { FileNode, ProjectOptions, SavedProject } from './types';
 import { LLMSettingsProvider, useLLMSettings } from './contexts/LLMSettingsContext';
 import { Settings } from './components/Settings';
+import { Layout } from './components/Layout';
+import { GenerationProgress } from './components/GenerationProgress';
 
-const SkeletonLoader = () => (
-    <div className="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex animate-pulse">
-        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-100 dark:bg-gray-900 p-4 space-y-4">
-            {[...Array(3)].map((_, i) => (
-                <div key={i}>
-                    <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
-                    <div className="pl-5 mt-2 space-y-2">
-                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
-                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
-                    </div>
-                </div>
-            ))}
-             <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mt-4"></div>
-             <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mt-4"></div>
-        </div>
-        <div className="w-2/3 flex-grow flex flex-col bg-gray-200 dark:bg-gray-800">
-            <div className="p-3 border-b border-gray-300 dark:border-gray-700">
-                <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
-            </div>
-            <div className="p-4 space-y-2 flex-grow">
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-5/6"></div>
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-            </div>
-        </div>
-    </div>
-);
 
-const GenerationProgress: React.FC<{ details: ProjectOptions }> = ({ details }) => {
-    const stackDisplay = details.stack === 'Custom' 
-        ? `${details.frontend} + ${details.backend}`
-        : details.stack;
-
-    return (
-        <>
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-bold text-black dark:text-white">Generating Project...</h3>
-            </div>
-            <div className="relative">
-                <SkeletonLoader />
-                <div className="absolute inset-0 bg-gray-200/80 dark:bg-gray-800/80 flex items-center justify-center">
-                    <div className="text-center p-8 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-300 dark:border-gray-700 max-w-md mx-auto">
-                        <div className="flex justify-center items-center mb-4">
-                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
-                        </div>
-                        <h4 className="text-xl font-semibold text-black dark:text-white mb-2">Crafting Your Codebase</h4>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Gemini is building your project. This might take a moment.</p>
-                        <div className="text-left text-sm space-y-2 bg-gray-100/50 dark:bg-gray-800/50 p-4 rounded-md border border-gray-300 dark:border-gray-700">
-                            <p><strong className="font-medium text-gray-700 dark:text-gray-300 w-28 inline-block">Stack:</strong> <span className="text-indigo-600 dark:text-indigo-300">{stackDisplay}</span></p>
-                            <p><strong className="font-medium text-gray-700 dark:text-gray-300 w-28 inline-block">Pattern:</strong> <span className="text-indigo-600 dark:text-indigo-300">{details.pattern}</span></p>
-                            <p><strong className="font-medium text-gray-700 dark:text-gray-300 w-28 inline-block">Auth:</strong> <span className="text-indigo-600 dark:text-indigo-300">{details.auth}</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
-};
 
 type Theme = 'light' | 'dark';
 
@@ -124,7 +66,7 @@ const AppContent: React.FC = () => {
     try {
       const files = await generateProjectStructure(options, llmSettings);
       setGeneratedFiles(files);
-      
+
       if (user && files && files.length > 0) {
         const projectName = options.description.slice(0, 50).trim() || 'Untitled Project';
         const savedProject = await projectHistoryService.saveProject(
@@ -146,7 +88,7 @@ const AppContent: React.FC = () => {
 
   const handleSaveProject = useCallback(async (name: string) => {
     if (!user || !generatedFiles || !projectOptions) return;
-    
+
     try {
       if (currentProjectId) {
         await projectHistoryService.updateProject(currentProjectId, {
@@ -165,13 +107,13 @@ const AppContent: React.FC = () => {
         setCurrentProjectId(savedProject.id);
         setToast({ message: 'Project saved successfully!', type: 'success' });
       }
-      
+
       setShowSaveDialog(false);
     } catch (err) {
       console.error(err);
-      setToast({ 
-        message: err instanceof Error ? err.message : 'Failed to save project', 
-        type: 'error' 
+      setToast({
+        message: err instanceof Error ? err.message : 'Failed to save project',
+        type: 'error'
       });
     }
   }, [user, generatedFiles, projectOptions, currentProjectId]);
@@ -185,107 +127,125 @@ const AppContent: React.FC = () => {
     setToast({ message: 'Project loaded successfully!', type: 'info' });
   }, []);
 
+  const handleDownloadZip = async () => {
+    if (!generatedFiles || !(window as any).JSZip) {
+      console.error("Files not available or JSZip not loaded.");
+      return;
+    }
+
+    const zip = new (window as any).JSZip();
+
+    const addFilesToZip = (zipFolder: any, nodes: FileNode[]) => {
+      nodes.forEach(node => {
+        if (node.type === 'folder') {
+          const newFolder = zipFolder.folder(node.name);
+          if (node.children.length > 0) {
+            addFilesToZip(newFolder, node.children);
+          }
+        } else {
+          zipFolder.file(node.name, node.content);
+        }
+      });
+    };
+
+    addFilesToZip(zip, generatedFiles);
+
+    try {
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${projectOptions?.description.slice(0, 20).trim().replace(/\s+/g, '-') || 'project'}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+      setToast({ message: 'Project downloaded successfully!', type: 'success' });
+    } catch (e) {
+      console.error("Error generating zip file:", e);
+      setToast({ message: 'Failed to generate zip file', type: 'error' });
+    }
+  };
+
+  const handleNewProject = () => {
+    setGeneratedFiles(null);
+    setProjectOptions(null);
+    setCurrentProjectId(null);
+    setError(null);
+  };
+
   if (!user) {
     return <AuthForm />;
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 flex flex-col transition-colors duration-300">
-      <header className="bg-white/70 dark:bg-gray-950/70 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <CodeBracketSquareIcon className="h-8 w-8 text-indigo-500" />
-              <h1 className="text-xl font-bold tracking-tight text-black dark:text-white">
-                Prompt-to-Project Starter
-              </h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
-                {user.name}
-              </span>
-              <button
-                onClick={() => setShowHistory(true)}
-                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                aria-label="Project history"
-                title="Project History"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-               <button
-                 onClick={() => setShowSettings(true)}
-                 className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                 aria-label="LLM settings"
-                 title="LLM Settings"
-               >
-                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-1.14 1.603-1.14 1.902 0l.149.57a1 1 0 00.95.69h.6a1 1 0 01.7.3l.424.425a1 1 0 00.707.293h.6c1.148 0 1.622 1.468.707 2.121l-.49.357a1 1 0 00-.364 1.118l.15.57c.3 1.14-.902 2.087-1.862 1.52l-.518-.298a1 1 0 00-1.094.117l-.424.424a1 1 0 01-.707.293h-.6a1 1 0 00-.95.69l-.149.57c-.3 1.14-1.603 1.14-1.902 0l-.149-.57a1 1 0 00-.95-.69h-.6a1 1 0 01-.7-.3l-.424-.425a1 1 0 00-.707-.293h-.6c-1.148 0-1.622-1.468-.707-2.121l.49-.357a1 1 0 00.364-1.118l-.15-.57c-.3-1.14.902-2.087 1.862-1.52l.518.298a1 1 0 001.094-.117l.424-.424A1 1 0 0110.5 4.187h.6a1 1 0 00.95-.69l.149-.57z" />
-                 </svg>
-               </button>
-               {generatedFiles && (
-                 <button
-                   onClick={() => setShowSaveDialog(true)}
-                   className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                   aria-label="Save project"
-                   title="Save Project"
-                 >
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg>
-                </button>
-              )}
-              <button
-                onClick={handleThemeSwitch}
-                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
-              </button>
-              <button
-                onClick={logout}
-                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-extrabold tracking-tight text-black dark:text-white sm:text-4xl">
+    <Layout
+      user={user}
+      onLogout={logout}
+      theme={theme}
+      onThemeSwitch={handleThemeSwitch}
+      onNewProject={handleNewProject}
+      onShowHistory={() => setShowHistory(true)}
+      onShowSettings={() => setShowSettings(true)}
+    >
+      <div className="max-w-4xl mx-auto">
+        {!generatedFiles && (
+          <div className="text-center mb-12 animate-fade-in">
+            <h2 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl mb-4">
               Turn Your Idea Into Code
             </h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Describe your application, select your tech stack, and let AI generate a complete starter project for you.
             </p>
           </div>
-          
-          <PromptForm onGenerate={handleGenerateProject} isLoading={isLoading} />
+        )}
 
-          {error && (
-            <div className="mt-10 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg" role="alert">
-              <strong className="font-bold">Error: </strong>
-              <span className="block sm:inline">{error}</span>
+        <PromptForm onGenerate={handleGenerateProject} isLoading={isLoading} />
+
+        {error && (
+          <div className="mt-8 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg animate-fade-in" role="alert">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium">Error</h3>
+                <div className="mt-2 text-sm">
+                  <p>{error}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-12">
+          {isLoading && projectOptions && <GenerationProgress details={projectOptions} />}
+          {generatedFiles && !isLoading && (
+            <div className="animate-slide-up">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Generated Project</h3>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleDownloadZip}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                  >
+                    <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                    Download
+                  </button>
+                  <button
+                    onClick={() => setShowSaveDialog(true)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                  >
+                    Save Project
+                  </button>
+                </div>
+              </div>
+              <ResultsDisplay files={generatedFiles} />
             </div>
           )}
-
-          <div className="mt-12">
-            {isLoading && projectOptions && <GenerationProgress details={projectOptions} />}
-            {generatedFiles && !isLoading && <ResultsDisplay files={generatedFiles} />}
-          </div>
         </div>
-      </main>
-      
-      <footer className="bg-white/70 dark:bg-gray-950/70 py-4 border-t border-gray-200 dark:border-gray-800">
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          Powered by your selected LLM provider
-        </div>
-      </footer>
+      </div>
 
       {showHistory && (
         <ProjectHistory
@@ -294,40 +254,43 @@ const AppContent: React.FC = () => {
         />
       )}
 
-       {showSaveDialog && (
-         <SaveProjectDialog
-           onSave={handleSaveProject}
-           onCancel={() => setShowSaveDialog(false)}
-           defaultName={projectOptions?.description.slice(0, 50) || ''}
-         />
-       )}
+      {showSaveDialog && (
+        <SaveProjectDialog
+          onSave={handleSaveProject}
+          onCancel={() => setShowSaveDialog(false)}
+          defaultName={projectOptions?.description.slice(0, 50) || ''}
+        />
+      )}
 
-       {showSettings && (
-         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-           <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-xl max-w-lg w-full mx-4">
-             <div className="flex justify-between items-center mb-3">
-               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">LLM Settings</h3>
-               <button
-                 onClick={() => setShowSettings(false)}
-                 className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"
-               >
-                 ✕
-               </button>
-             </div>
-             <Settings />
-           </div>
-         </div>
-       )}
- 
-       {toast && (
-         <Toast
-           message={toast.message}
-           type={toast.type}
-           onClose={() => setToast(null)}
-         />
-       )}
-     </div>
-   );
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-2xl max-w-lg w-full mx-4 border border-gray-200 dark:border-gray-800 transform transition-all scale-100">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Settings</h3>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <Settings />
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </Layout>
+  );
 };
 
 const App: React.FC = () => {
