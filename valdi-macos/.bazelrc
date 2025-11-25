@@ -90,6 +90,6 @@ build --valdi_js_engine=hermes
 # Valdi Open Source Flags
 build --define=open_source_build=true
 
-# Android SDK/NDK paths
-build --action_env=ANDROID_HOME=/usr/local/share/android-commandlinetools
-build --action_env=ANDROID_NDK_HOME=/usr/local/share/android-commandlinetools/ndk/25.2.9519653
+# Android SDK/NDK paths (using Flutter's Android SDK with NDK 26.3)
+build --action_env=ANDROID_HOME=/Users/universinformatique/Library/Android/sdk
+build --action_env=ANDROID_NDK_HOME=/Users/universinformatique/Library/Android/sdk/ndk/26.3.11579264
