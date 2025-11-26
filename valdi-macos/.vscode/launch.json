@@ -7,7 +7,7 @@
         "request": "attach",
         "websocketAddress": "ws://localhost:13595",
         "sourceMapPathOverrides": {
-            "/valdi-macos/*": "${workspaceRoot}/modules/valdi-macos/*"
+            "/valdi_macos/*": "${workspaceRoot}/modules/valdi_macos/*"
         },
         "sourceMaps": true,
         "restart": false,

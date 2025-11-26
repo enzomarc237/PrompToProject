@@ -2,9 +2,9 @@
     "extends": "../../bazel-valdi-macos/external/valdi/modules/_configs/base.tsconfig.json",
     "compilerOptions": {
         "paths": {
-            "valdi-macos/*": [
+            "valdi_macos/*": [
                 "./*",
-                "../../bazel-out/darwin_x86_64-fastbuild/bin/modules/valdi-macos/.valdi_build/projectsync/generated_ts/valdi-macos/*"
+                "../../bazel-out/darwin_x86_64-fastbuild/bin/modules/valdi_macos/.valdi_build/projectsync/generated_ts/valdi_macos/*"
             ],
             "jasmine/*": [
                 "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/jasmine/*"
@@ -31,7 +31,7 @@
         ],
         "rootDirs": [
             "..",
-            "../../bazel-out/darwin_x86_64-fastbuild/bin/modules/valdi-macos/.valdi_build/projectsync/generated_ts"
+            "../../bazel-out/darwin_x86_64-fastbuild/bin/modules/valdi_macos/.valdi_build/projectsync/generated_ts"
         ]
     }
 }

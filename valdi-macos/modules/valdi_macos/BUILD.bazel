@@ -1,7 +1,7 @@
 load("@valdi//bzl/valdi:valdi_module.bzl", "valdi_module")
 
 valdi_module(
-    name = "valdi-macos",
+    name = "valdi_macos",
     srcs = glob([
         "src/**/*.ts",
         "src/**/*.tsx",
