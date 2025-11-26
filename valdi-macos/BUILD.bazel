@@ -1,0 +1,19 @@
+load("@valdi//bzl/valdi:valdi_application.bzl", "valdi_application")
+load("@valdi//bzl/valdi:valdi_exported_library.bzl", "valdi_exported_library")
+
+valdi_application(
+    name = "valdi_macos_app",
+    ios_bundle_id = "com.website.valdimac",
+    ios_families = ["iphone"],
+    root_component_path = "App@valdi_macos/src/App",
+    title = "ValdiMacos",
+    version = "1.0.0",
+    deps = ["//modules/valdi_macos"],
+)
+
+valdi_exported_library(
+    name = "valdi_macos_export",
+    ios_bundle_id = "com.website.valdimac.lib",
+    ios_bundle_name = "ValdiMacos",
+    deps = ["//modules/valdi_macos"],
+)
