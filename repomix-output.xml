@@ -1,0 +1,5154 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.genkit/
+  traces_idx/
+    genkit.metadata
+components/
+  icons/
+    Icons.tsx
+  AuthForm.tsx
+  ErrorBoundary.tsx
+  ProjectHistory.tsx
+  PromptForm.tsx
+  ResultsDisplay.tsx
+  SaveProjectDialog.tsx
+  Toast.tsx
+contexts/
+  AuthContext.tsx
+lib/
+  pocketbase.ts
+scripts/
+  check-pocketbase.js
+  setup-valdi.sh
+services/
+  authService.ts
+  geminiService.ts
+  projectHistoryService.ts
+valdi-macos/
+  .vscode/
+    launch.json
+  modules/
+    valdi_macos/
+      res/
+        valdi@3x.png
+      src/
+        App.tsx
+      BUILD.bazel
+      tsconfig.json
+  .bazelrc
+  .bazelversion
+  .eslint.rc
+  .gitignore
+  .watchmanconfig
+  AGENTS.md
+  BUILD.bazel
+  NDK_SETUP.md
+  package.json
+  README.md
+  WORKSPACE
+.env.local.example
+.gitignore
+App.tsx
+constants.ts
+ENHANCEMENT_SUGGESTIONS.md
+FEATURE_SUMMARY.md
+index.html
+index.tsx
+ITERATIVE_GENERATION_GUIDE.md
+metadata.json
+MIGRATION.md
+package.json
+POCKETBASE_INTEGRATION.md
+pocketbase_schema.md
+QUICKSTART.md
+README.md
+STITCH_WIREFRAME_PROMPT.md
+tsconfig.json
+types.ts
+UI_WIREFRAME.md
+VALDI_MIGRATION.md
+vite.config.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="valdi-macos/modules/valdi_macos/src/App.tsx">
+import { StatefulComponent } from 'valdi_core/src/Component';
+import { ImageView, Label, View } from 'valdi_tsx/src/NativeTemplateElements';
+import { Style } from 'valdi_core/src/Style';
+import { systemBoldFont, systemFont } from 'valdi_core/src/SystemFont';
+import { AttributedText } from 'valdi_tsx/src/AttributedText';
+import { AttributedTextBuilder } from 'valdi_core/src/utils/AttributedTextBuilder';
+import { Device } from 'valdi_core/src/Device';
+import { getDaemonClientManager } from 'valdi_core/src/debugging/DaemonClientManagerResolver';
+import { IDaemonClientManagerListener } from 'valdi_core/src/debugging/DaemonClientManager';
+import res from '../res';
+
+/**
+ * @ViewModel
+ * @ExportModel
+ */
+export interface AppViewModel {}
+
+/**
+ * @Context
+ * @ExportModel
+ */
+export interface AppComponentContext {}
+
+interface State {
+  hotReloaderConnected: boolean;
+}
+
+/**
+ * @Component
+ * @ExportModel
+ */
+export class App extends StatefulComponent<AppViewModel, AppComponentContext> implements IDaemonClientManagerListener {
+  state: State = { hotReloaderConnected: false };
+
+  onCreate(): void {
+    console.log('On App create!');
+    getDaemonClientManager().addListener(this);
+  }
+
+  onDestroy(): void {
+    console.log('On App destroy!');
+    getDaemonClientManager().removeListener(this);
+  }
+
+  onAvailabilityChanged(available: boolean): void {
+    this.setState({ hotReloaderConnected: available });
+  }
+
+  onRender(): void {
+    console.log('On App render!');
+    <view style={styles.main}>
+      <image style={styles.logo} src={res.valdi} />
+      <layout padding={20}>
+        <label style={styles.title} value={`Welcome to Valdi!`} />
+      </layout>
+      <label style={styles.subtitle} value={this.renderLabel()} />
+    </view>;
+  }
+
+  private renderLabel(): AttributedText {
+    const textBuilder = new AttributedTextBuilder();
+
+    textBuilder.appendText('This is currently running on ');
+    textBuilder.appendStyled({
+      content: this.getPlatformString(),
+      attributes: {
+        color: 'red',
+        font: systemBoldFont(20),
+      },
+    });
+
+    textBuilder.appendText('\nHot reloader ');
+    if (this.state.hotReloaderConnected) {
+      textBuilder.appendStyled({
+        content: 'connected',
+        attributes: {
+          color: 'green',
+          font: systemBoldFont(20),
+        },
+      });
+    } else {
+      textBuilder.appendStyled({
+        content: 'disconnected',
+        attributes: {
+          color: 'red',
+          font: systemBoldFont(20),
+        },
+      });
+    }
+
+    return textBuilder.build();
+  }
+
+  private getPlatformString(): string {
+    if (Device.isDesktop()) {
+      return 'Desktop';
+    } else if (Device.isIOS()) {
+      return 'iOS';
+    } else if (Device.isAndroid()) {
+      return 'Android';
+    } else {
+      return 'Unknown';
+    }
+  }
+}
+
+const styles = {
+  main: new Style<View>({
+    backgroundColor: 'white',
+    justifyContent: 'center',
+  }),
+  logo: new Style<ImageView>({
+    width: 80,
+    height: 80,
+    alignSelf: 'center',
+    borderRadius: 16,
+    boxShadow: '0 0 3 rgba(0, 0, 0, 0.15)',
+  }),
+  title: new Style<Label>({
+    color: 'black',
+    font: systemBoldFont(24),
+    accessibilityCategory: 'header',
+    alignSelf: 'center',
+  }),
+
+  subtitle: new Style<Label>({
+    alignSelf: 'center',
+    color: 'black',
+    font: systemFont(20),
+    numberOfLines: 0,
+    textAlign: 'center',
+  }),
+};
+</file>
+
+<file path="valdi-macos/modules/valdi_macos/BUILD.bazel">
+load("@valdi//bzl/valdi:valdi_module.bzl", "valdi_module")
+
+valdi_module(
+    name = "valdi_macos",
+    srcs = glob([
+        "src/**/*.ts",
+        "src/**/*.tsx",
+    ]),
+    res = glob([
+        "res/**/*.jpeg",
+        "res/**/*.jpg",
+        "res/**/*.png",
+        "res/**/*.svg",
+        "res/**/*.webp",
+    ]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@valdi//src/valdi_modules/src/valdi/valdi_core",
+        "@valdi//src/valdi_modules/src/valdi/valdi_tsx",
+    ],
+)
+</file>
+
+<file path="valdi-macos/modules/valdi_macos/tsconfig.json">
+{
+    "extends": "../../bazel-valdi-macos/external/valdi/modules/_configs/base.tsconfig.json",
+    "compilerOptions": {
+        "paths": {
+            "valdi_macos/*": [
+                "./*",
+                "../../bazel-out/darwin_x86_64-fastbuild/bin/modules/valdi_macos/.valdi_build/projectsync/generated_ts/valdi_macos/*"
+            ],
+            "jasmine/*": [
+                "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/jasmine/*"
+            ],
+            "coreutils/*": [
+                "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/coreutils/*"
+            ],
+            "source_map/*": [
+                "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/source_map/*"
+            ],
+            "valdi_tsx/*": [
+                "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/valdi_tsx/*"
+            ],
+            "valdi_core/*": [
+                "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/valdi_core/*"
+            ],
+            "tslib": [
+                "../../bazel-valdi-macos/external/valdi/src/valdi_modules/src/valdi/valdi_core/src/tslib"
+            ]
+        },
+        "types": [
+            "../../bazel-valdi-macos/external/valdi/modules/types/Long",
+            "../../bazel-valdi-macos/external/valdi/modules/types/globals"
+        ],
+        "rootDirs": [
+            "..",
+            "../../bazel-out/darwin_x86_64-fastbuild/bin/modules/valdi_macos/.valdi_build/projectsync/generated_ts"
+        ]
+    }
+}
+</file>
+
+<file path="STITCH_WIREFRAME_PROMPT.md">
+# Stitch Prompt for Visual Wireframe Generation
+
+Use the following prompt in Stitch or any AI wireframe/design tool to generate a visual wireframe for the Iterative Generation feature:
+
+```
+Create a detailed web app wireframe for an AI-powered project generator and editor. The main screen should include:
+
+- A top navigation bar with: user avatar/name, “New Project”, “Project History”, and “Logout” buttons.
+- The project title at the top, with an “Extend Project” button and a prompt input field for project-wide changes.
+- A sidebar or main section showing a file/folder tree (e.g., src/, public/), with each file and folder having “View”, “Refine”, and (for files) “Diff” buttons.
+- When “Refine” is clicked, show a modal with:
+    - The file name
+    - A scrollable code preview
+    - A prompt input for refinement
+    - “Show AI Suggestions”, “Submit”, and “Cancel” buttons
+- When “Extend Project” is clicked, show a modal with:
+    - The project structure (expandable tree)
+    - A prompt input for extension
+    - “Show AI Suggestions”, “Submit”, and “Cancel” buttons
+- Include a “Version History” modal with a list of previous versions, each with “View” and “Restore” options.
+- At the bottom or in a toolbar, include “Download ZIP”, “Share”, “Undo”, “Redo”, and “Show Version History” buttons.
+- Show loading spinners and toast notifications for feedback.
+
+Use a clean, modern style with clear separation between navigation, file tree, modals, and action buttons. Indicate modal overlays and highlight interactive elements.
+```
+
+---
+
+This prompt will help you quickly generate a visual wireframe in Stitch or similar tools.
+</file>
+
+<file path="UI_WIREFRAME.md">
+# UI Wireframe for Iterative Generation
+
+```
++-----------------------------------------------------------------------------------+
+|                                Prompt-to-Project                                  |
++-----------------------------------------------------------------------------------+
+| [User: Jane Doe]         [New Project]   [Project History]   [Logout]             |
++-----------------------------------------------------------------------------------+
+| Project: My React App                     [Extend Project ▼]                      |
+|-----------------------------------------------------------------------------------|
+| [Prompt: ____________________________________________] [Extend]                   |
+|-----------------------------------------------------------------------------------|
+| Project Files:                                                                   |
+|                                                                                   |
+|   src/                                                                           |
+|   ├── App.js         [View] [Refine] [Diff]                                       |
+|   ├── index.js       [View] [Refine]                                              |
+|   └── components/                                                                |
+|        ├── TodoList.js   [View] [Refine] [Diff]                                   |
+|        └── Header.js     [View] [Refine]                                          |
+|                                                                                   |
+|   public/                                                                        |
+|   └── index.html     [View] [Refine]                                              |
+|                                                                                   |
+| [Add File] [Add Folder]                                                           |
+|-----------------------------------------------------------------------------------|
+| [Download ZIP] [Share] [Undo] [Redo] [Show Version History]                       |
++-----------------------------------------------------------------------------------+
+
+[Refine Modal]
+-------------------------------------------------------------------------------------
+| Refine: src/components/TodoList.js                                                |
+|                                                                                   |
+| Current Content:                                                                  |
+| // ... (code preview, scrollable)                                                 |
+|                                                                                   |
+| Prompt: [Add drag-and-drop support to this component.]                            |
+|                                                                                   |
+| [Show AI Suggestions ▼]                                                           |
+|                                                                                   |
+| [Submit] [Cancel]                                                                 |
+-------------------------------------------------------------------------------------
+
+[Extend Project Modal]
+-------------------------------------------------------------------------------------
+| Extend Project:                                                                   |
+|                                                                                   |
+| Current Structure:                                                                |
+| - src/ (expandable tree)                                                          |
+| - public/                                                                         |
+|                                                                                   |
+| Prompt: [Add a settings page with theme toggle.]                                  |
+|                                                                                   |
+| [Show AI Suggestions ▼]                                                           |
+|                                                                                   |
+| [Submit] [Cancel]                                                                 |
+-------------------------------------------------------------------------------------
+
+[Diff Modal]
+-------------------------------------------------------------------------------------
+| Diff: src/components/TodoList.js                                                  |
+|                                                                                   |
+| - (old code, highlighted in red)                                                  |
+| + (new code, highlighted in green)                                                |
+|                                                                                   |
+| [Accept Changes] [Reject]                                                         |
+-------------------------------------------------------------------------------------
+
+[Version History Modal]
+-------------------------------------------------------------------------------------
+| Version History:                                                                  |
+|                                                                                   |
+| [v1] Initial Generation   [View] [Restore]                                        |
+| [v2] Refined TodoList.js  [View] [Restore]                                        |
+| [v3] Added settings page  [View] [Restore]                                        |
+|                                                                                   |
+| [Close]                                                                           |
+-------------------------------------------------------------------------------------
+
+[Loading Spinner]  [Toast: “TodoList.js updated successfully!”]
+```
+
+---
+
+This wireframe illustrates the main project view, modals for refining/extending, diffing, and version history, as well as global actions and feedback elements.
+</file>
+
+<file path=".genkit/traces_idx/genkit.metadata">
+{"version":"1.21.0"}
+</file>
+
+<file path="components/AuthForm.tsx">
+import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+
+export const AuthForm: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, register } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        await login(email, password);
+      } else {
+        if (!name.trim()) {
+          throw new Error('Name is required');
+        }
+        await register(email, password, name);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-black dark:text-white">
+            {isLogin ? 'Sign in to your account' : 'Create a new account'}
+          </h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+              }}
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              {isLogin ? 'Sign up' : 'Sign in'}
+            </button>
+          </p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm space-y-4">
+            {!isLogin && (
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required={!isLogin}
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                required
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="rounded-md bg-red-50 dark:bg-red-900/50 border border-red-300 dark:border-red-700 p-4">
+              <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+            </div>
+          )}
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-500/50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                isLogin ? 'Sign in' : 'Sign up'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="components/SaveProjectDialog.tsx">
+import React, { useState } from 'react';
+
+interface SaveProjectDialogProps {
+  onSave: (name: string) => void;
+  onCancel: () => void;
+  defaultName?: string;
+}
+
+export const SaveProjectDialog: React.FC<SaveProjectDialogProps> = ({ 
+  onSave, 
+  onCancel, 
+  defaultName = '' 
+}) => {
+  const [name, setName] = useState(defaultName);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim()) {
+      onSave(name.trim());
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 transition-opacity bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+
+        <div className="inline-block align-bottom bg-white dark:bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <form onSubmit={handleSubmit}>
+            <div className="px-6 pt-5 pb-4">
+              <div className="sm:flex sm:items-start">
+                <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                    Save Project
+                  </h3>
+                  <div className="mt-2">
+                    <label htmlFor="project-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Project Name
+                    </label>
+                    <input
+                      id="project-name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter project name..."
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800/50 sm:flex sm:flex-row-reverse gap-3">
+              <button
+                type="submit"
+                disabled={!name.trim()}
+                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:w-auto sm:text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="components/Toast.tsx">
+import React, { useEffect } from 'react';
+
+interface ToastProps {
+  message: string;
+  type?: 'success' | 'error' | 'info';
+  onClose: () => void;
+  duration?: number;
+}
+
+export const Toast: React.FC<ToastProps> = ({ 
+  message, 
+  type = 'success', 
+  onClose, 
+  duration = 3000 
+}) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, duration);
+    return () => clearTimeout(timer);
+  }, [onClose, duration]);
+
+  const bgColor = {
+    success: 'bg-green-500',
+    error: 'bg-red-500',
+    info: 'bg-blue-500',
+  }[type];
+
+  const icon = {
+    success: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    ),
+    error: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    ),
+    info: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  }[type];
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 animate-slide-up">
+      <div className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 min-w-[300px]`}>
+        {icon}
+        <span className="flex-1">{message}</span>
+        <button
+          onClick={onClose}
+          className="text-white hover:text-gray-200 focus:outline-none"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="lib/pocketbase.ts">
+import PocketBase from 'pocketbase';
+
+const PB_URL = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090';
+
+export const pb = new PocketBase(PB_URL);
+
+pb.autoCancellation(false);
+
+export default pb;
+</file>
+
+<file path="scripts/check-pocketbase.js">
+#!/usr/bin/env node
+
+const POCKETBASE_URL = process.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090';
+
+async function checkPocketBase() {
+  console.log('Checking PocketBase connection...');
+  console.log(`URL: ${POCKETBASE_URL}`);
+  
+  try {
+    const response = await fetch(`${POCKETBASE_URL}/api/health`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ PocketBase is running!');
+      console.log(`Status: ${data.message}`);
+      console.log(`Code: ${data.code}`);
+      return true;
+    } else {
+      console.error('❌ PocketBase is not responding correctly');
+      console.error(`Status: ${response.status}`);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Cannot connect to PocketBase');
+    console.error(`Error: ${error.message}`);
+    console.log('\nMake sure PocketBase is running:');
+    console.log('  ./pocketbase serve');
+    console.log('\nOr download it from: https://pocketbase.io/docs/');
+    return false;
+  }
+}
+
+checkPocketBase().then(success => {
+  process.exit(success ? 0 : 1);
+});
+</file>
+
+<file path="scripts/setup-valdi.sh">
+#!/bin/bash
+set -e
+
+echo "🚀 Setting up Valdi for macOS development..."
+
+# Check if Valdi is installed
+if ! command -v valdi &> /dev/null; then
+    echo "❌ Valdi CLI not found. Installing..."
+    npm install -g @snap/valdi
+else
+    echo "✅ Valdi CLI already installed ($(valdi --version))"
+fi
+
+# Run Valdi development setup
+echo "📦 Running valdi dev_setup (this may take 10-20 minutes)..."
+valdi dev_setup
+
+# Verify installation
+echo "🔍 Verifying installation..."
+valdi doctor
+
+echo "✅ Valdi setup complete!"
+echo ""
+echo "Next steps:"
+echo "1. cd valdi-macos"
+echo "2. valdi bootstrap"
+echo "3. ./buckw project --ide xcode valdi:valdi-desktop-apple"
+echo "4. open valdi/valdi-desktop-apple.xcworkspace"
+</file>
+
+<file path="valdi-macos/.vscode/launch.json">
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+        "name": "Valdi attach",
+        "type": "node",
+        "request": "attach",
+        "websocketAddress": "ws://localhost:13595",
+        "sourceMapPathOverrides": {
+            "/valdi_macos/*": "${workspaceRoot}/modules/valdi_macos/*"
+        },
+        "sourceMaps": true,
+        "restart": false,
+        "resolveSourceMapLocations": []
+    }
+  ]
+}
+</file>
+
+<file path="valdi-macos/.bazelversion">
+7.2.1
+</file>
+
+<file path="valdi-macos/.eslint.rc">
+module.exports = {
+  root: true,
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ['./src/valdi/_configs/eslint.tsconfig.json'],
+  },
+  plugins: ['@typescript-eslint', 'unused-imports', 'rxjs', 'prettier', '@snapchat/eslint-plugin-valdi'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:import/recommended',
+    'plugin:import/typescript',
+    'prettier',
+  ],
+  rules: { 
+    '@snapchat/valdi/attributed-text-no-array-assignment': 'error',
+    '@snapchat/valdi/jsx-no-lambda': 'error',
+    '@snapchat/valdi/assign-timer-id': 'error',
+    '@snapchat/valdi/only-const-enum': 'off',
+    '@snapchat/valdi/no-implicit-index-import': 'error',
+    '@snapchat/valdi/mutate-state-without-set-state': 'error',
+    '@snapchat/valdi/no-import-from-test-outside-test-dir': 'error',
+    '@snapchat/valdi/no-declare-test-without-describe': 'error', 
+  },
+};
+</file>
+
+<file path="valdi-macos/.gitignore">
+*.DS_Store
+
+bazel-*
+node_modules
+</file>
+
+<file path="valdi-macos/.watchmanconfig">
+{
+    "root_files": [".watchmanconfig"],
+    "ignore_dirs": [
+        "bazel-out",
+        "bazel-bin",
+        "bazel-testlogs"
+    ]
+}
+</file>
+
+<file path="valdi-macos/AGENTS.md">
+# AGENTS.md - Guide for AI Coding Assistants
+
+This document provides context and guidelines for AI coding assistants working on this Valdi application.
+
+## Overview
+
+This is a Valdi application that runs natively on iOS, Android, and macOS. Valdi is a cross-platform UI framework that compiles declarative TypeScript components to native views - no web views, no JavaScript bridges.
+
+## Project Structure
+
+- **`modules/`** - Your application modules
+  - Each module contains TypeScript/TSX source files
+  - `BUILD.bazel` files define how modules are built
+  - `src/` contains your component and business logic code
+- **`WORKSPACE`** - Bazel workspace configuration
+- **`config.yaml`** - Valdi project configuration
+- **`.bazelrc`** - Bazel build settings
+
+## Key Technologies
+
+- **Valdi** - Cross-platform UI framework that compiles to native code
+- **TypeScript/TSX** - React-like syntax for declarative UI (but compiles to native, not React)
+- **Bazel** - Build system (note: `bzl` is an alias for `bazel`)
+- **Flexbox** - Layout system with automatic RTL support
+
+## Development Workflow
+
+### Initial Setup
+
+```bash
+# Install Valdi CLI (if not already installed)
+cd path/to/valdi/npm_modules/cli
+npm run cli:install
+
+# Setup development environment
+valdi dev_setup
+
+# Sync project (run after changing dependencies or config)
+valdi projectsync
+```
+
+### Building and Running
+
+```bash
+# Install and run on iOS
+valdi install ios
+
+# Install and run on Android  
+valdi install android
+
+# Install and run on macOS
+valdi install macos
+
+# Start hot reload (for instant updates while developing)
+valdi hotreload
+```
+
+### Common Commands
+
+```bash
+# Sync project configuration and generate IDE files
+valdi projectsync
+
+# Build specific targets with Bazel
+bazel build //modules/valdi-macos:valdi-macos
+
+# Run tests
+bazel test //modules/valdi-macos:tests
+```
+
+## Valdi Component Basics
+
+Components use a class-based pattern with lifecycle methods:
+
+```typescript
+import { Component } from 'valdi_core/src/Component';
+
+class MyComponent extends Component {
+  // Required: Render the component's UI
+  onRender() {
+    <view backgroundColor="#FFFC00" padding={30}>
+      <label value="Hello World" color="black" />
+    </view>;
+  }
+  
+  // Optional lifecycle methods:
+  // onMount() - Called when component is first mounted
+  // onUnmount() - Called before component is removed
+  // onUpdate(prevProps) - Called when component updates
+}
+```
+
+### Key Concepts
+
+- **TSX/JSX Syntax** - Similar to React but compiles to native views
+- **State Management** - Use component properties and setState
+- **Flexbox Layout** - Use flexbox properties for layout
+- **Event Handlers** - Handle user interactions with callbacks
+- **Provider Pattern** - Dependency injection for passing services down the component tree
+
+## Common Patterns
+
+### Styling Components
+
+```typescript
+<view 
+  backgroundColor="#FFFFFF"
+  padding={20}
+  flexDirection="column"
+  alignItems="center"
+>
+  <label value="Styled text" fontSize={16} color="#000000" />
+</view>
+```
+
+### Handling Events
+
+```typescript
+class MyButton extends Component {
+  private handlePress() {
+    console.log('Button pressed!');
+  }
+  
+  onRender() {
+    <view onPress={() => this.handlePress()}>
+      <label value="Click Me" />
+    </view>;
+  }
+}
+```
+
+### Using Providers
+
+```typescript
+import { Provider } from 'valdi_core/src/Provider';
+
+class App extends Component {
+  onRender() {
+    const myService = new MyService();
+    
+    <Provider value={myService}>
+      <MyChildComponent />
+    </Provider>;
+  }
+}
+```
+
+## Available Standard Library Modules
+
+- `valdi_core` - Core component and runtime APIs
+- `valdi_http` - Promise-based HTTP client for network requests
+- `valdi_navigation` - Navigation utilities
+- `valdi_rxjs` - RxJS integration for reactive programming
+- `persistence` - Key-value storage with encryption and TTL support
+- `foundation`, `coreutils` - Common utilities (arrays, Base64, LRU cache, UUID, etc.)
+- `worker` - Worker service support for background JavaScript execution
+
+## Debugging
+
+- **VSCode Integration** - Set breakpoints and debug TypeScript code
+- **Hermes Debugger** - Use Chrome DevTools for JavaScript debugging
+- **Hot Reload** - See changes instantly without rebuilding
+- **Native Debugging** - Use Xcode or Android Studio for platform-specific issues
+
+See Valdi documentation at `/docs/docs/workflow-hermes-debugger.md` for detailed debugging instructions.
+
+## Common Pitfalls
+
+1. **Always run `valdi projectsync`** after changing dependencies or config files
+2. **Use hot reload during development** - Much faster than rebuilding
+3. **Flexbox layout** - Valdi uses flexbox, not native iOS/Android layout
+4. **Component state** - Remember to call `setState()` to trigger re-renders
+5. **Build cache** - If builds seem stuck, try `bazel clean`
+
+## Important Files
+
+- **`config.yaml`** - Project configuration (dependencies, settings)
+- **`WORKSPACE`** - Bazel workspace and external dependencies
+- **`BUILD.bazel`** - Build rules for each module
+- **`.bazelrc`** - Bazel build flags and configuration
+
+## Getting Help
+
+- **Documentation** - Valdi docs in the framework repository at `/docs/`
+- **Discord** - Join the [Valdi Discord community](https://discord.gg/uJyNEeYX2U)
+- **Examples** - Check `/apps/` directory in Valdi repository for examples
+- **API Reference** - See `/docs/api/` for comprehensive API documentation
+- **Codelabs** - Step-by-step tutorials at `/docs/codelabs/`
+
+## Key Points for AI Assistants
+
+1. **This is a Valdi application** - Not React, React Native, or web-based
+2. **TSX compiles to native** - No JavaScript runtime on device, components are compiled
+3. **Use `valdi` CLI commands** - Primary tool for building and running
+4. **Hot reload is fast** - Encourage using it for rapid iteration
+5. **Bazel is the build system** - Direct bazel commands available but CLI preferred
+6. **Cross-platform by default** - Code runs on iOS, Android, and macOS
+
+---
+
+*This document is intended for AI coding assistants to quickly understand this Valdi application. For comprehensive Valdi framework documentation, refer to the main Valdi repository at https://github.com/Snapchat/Valdi*
+</file>
+
+<file path="valdi-macos/BUILD.bazel">
+load("@valdi//bzl/valdi:valdi_application.bzl", "valdi_application")
+load("@valdi//bzl/valdi:valdi_exported_library.bzl", "valdi_exported_library")
+
+valdi_application(
+    name = "valdi_macos_app",
+    ios_bundle_id = "com.website.valdimac",
+    ios_families = ["iphone"],
+    root_component_path = "App@valdi_macos/src/App",
+    title = "ValdiMacos",
+    version = "1.0.0",
+    deps = ["//modules/valdi_macos"],
+)
+
+valdi_exported_library(
+    name = "valdi_macos_export",
+    ios_bundle_id = "com.website.valdimac.lib",
+    ios_bundle_name = "ValdiMacos",
+    deps = ["//modules/valdi_macos"],
+)
+</file>
+
+<file path="valdi-macos/NDK_SETUP.md">
+# Android NDK Setup for Valdi
+
+## Option 1: Use Existing Flutter NDK (Recommended)
+
+If you have Flutter installed, you likely already have Android NDK:
+
+```bash
+# Check Flutter's Android SDK location
+flutter doctor -v | grep "Android SDK"
+
+# Check for NDK
+ls -la ~/Library/Android/sdk/ndk/
+```
+
+Update `.bazelrc` to point to your NDK:
+```bash
+build --action_env=ANDROID_HOME=/Users/YOUR_USERNAME/Library/Android/sdk
+build --action_env=ANDROID_NDK_HOME=/Users/YOUR_USERNAME/Library/Android/sdk/ndk/VERSION
+```
+
+## Option 2: Manual Download
+
+### Download NDK 25.2.9519653
+
+1. **Download from Google:**
+   - macOS: https://dl.google.com/android/repository/android-ndk-r25c-darwin.dmg
+   - Or ZIP: https://dl.google.com/android/repository/android-ndk-r25c-darwin.zip
+
+2. **Extract to Android SDK:**
+   ```bash
+   # Create NDK directory if it doesn't exist
+   mkdir -p ~/Library/Android/sdk/ndk
+   
+   # If you downloaded DMG, mount and copy
+   # Or if ZIP:
+   unzip android-ndk-r25c-darwin.zip
+   mv android-ndk-r25c ~/Library/Android/sdk/ndk/25.2.9519653
+   ```
+
+3. **Verify structure:**
+   ```bash
+   ls ~/Library/Android/sdk/ndk/25.2.9519653/toolchains/llvm/prebuilt/darwin-x86_64
+   ```
+   Should contain: bin, lib64, sysroot, etc.
+
+### Alternative: Use sdkmanager
+
+```bash
+# Install via Android SDK Manager
+sdkmanager "ndk;25.2.9519653"
+
+# Or install latest
+sdkmanager "ndk-bundle"
+```
+
+## Option 3: Install via Homebrew
+
+```bash
+# Install Android command-line tools
+brew install --cask android-commandlinetools
+
+# Install NDK
+sdkmanager --sdk_root=/usr/local/share/android-commandlinetools "ndk;25.2.9519653"
+```
+
+## Verify Installation
+
+```bash
+# Check NDK exists
+ls -la $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/
+
+# Test Valdi build
+cd valdi-macos
+valdi projectsync
+```
+
+## Troubleshooting
+
+### Error: "can't readdir(), not a directory"
+- NDK download incomplete
+- Check if toolchains/llvm/prebuilt/darwin-x86_64 exists
+- Re-download or use different NDK version
+
+### Error: "ANDROID_NDK_HOME not set"
+- Add to .bazelrc or set environment variable:
+  ```bash
+  export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.2.9519653
+  ```
+
+## Current Setup
+
+This project uses:
+- **ANDROID_HOME**: `/Users/universinformatique/Library/Android/sdk`
+- **ANDROID_NDK_HOME**: `/Users/universinformatique/Library/Android/sdk/ndk/26.3.11579264`
+- Configured in: `.bazelrc`
+</file>
+
+<file path="valdi-macos/package.json">
+{
+    "name": "hello_world",
+    "version": "1.0.0",
+    "description": "Valdi Helloworld app",
+    "license": "ISC",
+    "devDependencies": {
+      "@snap/eslint-plugin-valdi": "1.0.2",
+      "@types/eslint": "^9.6.1",
+      "@types/jasmine": "^5.1.7",
+      "@typescript-eslint/eslint-plugin": "^6.21.0",
+      "@typescript-eslint/parser": "^6.21.0",
+      "@typescript-eslint/utils": "^6.21.0",
+      "eslint": "^8.27.0",
+      "eslint-config-prettier": "^8.5.0",
+      "eslint-plugin-import": "^2.26.0",
+      "eslint-plugin-prettier": "^4.2.1",
+      "eslint-plugin-rxjs": "^5.0.2",
+      "eslint-plugin-unused-imports": "^3.2.0",
+      "jasmine": "^5.6.0",
+      "ts-node": "^10.9.2",
+      "typescript": "5.3.3"
+    }
+  }
+</file>
+
+<file path="valdi-macos/README.md">
+# valdi_demo
+Demo of a hello world app using Valdi open source
+
+## Usage
+
+All commands requires `valdi` to be available on PATH.
+
+Get auto completion in VSCode
+```sh
+valdi projectsync
+```
+
+Build and install iOS:
+```sh
+valdi install ios
+```
+
+Build and install Android:
+```sh
+valdi install android
+```
+
+Build and install MacOS:
+```sh
+valdi install macos
+```
+
+Start hot reloader:
+```sh
+valdi hotreload
+```
+</file>
+
+<file path="valdi-macos/WORKSPACE">
+workspace(name = "valdi-macos")
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+
+http_archive(
+    name = "valdi",
+    strip_prefix = "Valdi-beta-0.0.1",
+    url = "https://github.com/Snapchat/Valdi/archive/refs/tags/beta-0.0.1.tar.gz",
+)
+
+
+http_archive(
+    name = "valdi_widgets",
+    strip_prefix = "Valdi_Widgets-beta-0.0.1",
+    url = "https://github.com/Snapchat/Valdi_Widgets/archive/refs/tags/beta-0.0.1.tar.gz",
+)
+
+load("@valdi//bzl:workspace_prepare.bzl", "valdi_prepare_workspace")
+
+valdi_prepare_workspace()
+
+load("@valdi//bzl:workspace_preinit.bzl", "valdi_preinitialize_workspace")
+
+valdi_preinitialize_workspace()
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "aspect_bazel_lib_register_toolchains", "register_yq_toolchains")
+
+register_yq_toolchains()
+
+# Required bazel-lib dependencies
+
+aspect_bazel_lib_dependencies()
+
+# Required rules_shell dependencies
+load("@rules_shell//shell:repositories.bzl", "rules_shell_dependencies", "rules_shell_toolchains")
+
+rules_shell_dependencies()
+
+rules_shell_toolchains()
+
+# Register bazel-lib toolchains
+
+aspect_bazel_lib_register_toolchains()
+
+# Create the host platform repository transitively required by bazel-lib
+
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("@platforms//host:extension.bzl", "host_platform_repo")
+
+maybe(
+    host_platform_repo,
+    name = "host_platform",
+)
+
+load("@valdi//bzl:workspace_init.bzl", "valdi_initialize_workspace")
+
+valdi_initialize_workspace()
+
+load("@valdi_npm//:repositories.bzl", "npm_repositories")
+
+npm_repositories()
+
+load("@valdi//bzl:workspace_postinit.bzl", "valdi_post_initialize_workspace")
+
+valdi_post_initialize_workspace()
+</file>
+
+<file path=".env.local.example">
+# Gemini API Key (required)
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
+
+# PocketBase URL (default: http://127.0.0.1:8090)
+VITE_POCKETBASE_URL=http://127.0.0.1:8090
+</file>
+
+<file path="ENHANCEMENT_SUGGESTIONS.md">
+# Enhancement Suggestions for Prompt-to-Project App
+
+## 1. AI Generation Enhancements
+- **Advanced Prompt Options:** Allow users to specify frameworks, languages, or project complexity. Add toggles/dropdowns for common options (frontend/backend, database, authentication, etc.).
+- **Project Templates & Examples:** Offer curated templates for common project types. Let users start from a template and customize with their own prompt.
+- **Iterative Generation:** Allow users to refine or regenerate parts of the project. Support follow-up prompts to modify or extend the generated project.
+- **AI Model Upgrades:** Integrate with the latest Gemini or other LLMs (e.g., GPT-4, Claude). Add fallback or ensemble generation for improved results.
+
+## 2. User Experience (UX) Improvements
+- **Live Preview:** Render a live preview of the generated app (e.g., using StackBlitz, CodeSandbox, or a built-in iframe). Let users interact with the app before downloading.
+- **File Editing:** Allow users to edit files directly in the browser with syntax highlighting. Support saving edits back to their project history.
+- **Download & Export:** Enable one-click download of the entire project as a ZIP file. Support exporting to GitHub or other platforms.
+- **Collaboration:** Allow users to share projects with others (view or edit access). Add team workspaces for collaborative project building.
+
+## 3. Project Management Features
+- **Project Versioning:** Track changes and allow users to revert to previous versions. Show a history/timeline of edits and generations.
+- **Favorites & Tags:** Let users star favorite projects and organize with tags or folders.
+- **Comments & Annotations:** Allow users to add notes or comments to files or projects.
+
+## 4. Security & Scalability
+- **OAuth & SSO:** Add Google, GitHub, or Microsoft login for easier onboarding.
+- **Rate Limiting & Abuse Prevention:** Prevent abuse of the AI generation API with per-user rate limits.
+- **Data Backups:** Implement automated backups for user projects and authentication data.
+- **Audit Logs:** Track important actions (generation, deletion, sharing) for security and support.
+
+## 5. Backend & Infrastructure
+- **Real-Time Collaboration:** Use WebSockets or PocketBase’s real-time features for live editing and updates.
+- **Scalability:** Support horizontal scaling for both frontend and backend. Consider using a managed database for production.
+- **Analytics:** Add usage analytics (with user consent) to understand popular prompts, templates, and features.
+
+## 6. Documentation & Onboarding
+- **Interactive Onboarding:** Guide new users through the app with tooltips and sample prompts.
+- **In-App Documentation:** Provide help sections, FAQ, and troubleshooting directly in the app.
+
+## 7. Future AI Features
+- **Code Explanations:** Let users ask the AI to explain generated code or specific files.
+- **Bug Fix Suggestions:** Allow users to report issues in generated code and get AI-powered fixes.
+- **Test Generation:** Automatically generate unit tests for the generated code.
+
+## 8. Accessibility & Internationalization
+- **Accessibility:** Ensure the app is fully accessible (keyboard navigation, screen reader support).
+- **Localization:** Support multiple languages for a global user base.
+
+## 9. Technical Debt & Code Quality
+- **Automated Testing:** Add unit, integration, and end-to-end tests for critical flows.
+- **Linting & Formatting:** Enforce code style with ESLint, Prettier, and TypeScript strictness.
+- **Error Handling:** Improve error messages and fallback UI for failed generations or network issues.
+
+---
+
+### Summary Table
+
+| Area                | Enhancement Example                        |
+|---------------------|--------------------------------------------|
+| AI Generation       | Advanced options, iterative refinement     |
+| UX                  | Live preview, in-browser editing           |
+| Project Management  | Versioning, favorites, comments            |
+| Security            | OAuth, rate limiting, audit logs           |
+| Backend             | Real-time collab, analytics, scalability   |
+| Docs/Onboarding     | Interactive guides, in-app help            |
+| Accessibility       | Keyboard, screen reader, localization      |
+| Code Quality        | Automated tests, linting, error handling   |
+
+---
+
+These suggestions are intended to guide future development and help prioritize impactful improvements for the Prompt-to-Project app.
+</file>
+
+<file path="ITERATIVE_GENERATION_GUIDE.md">
+# Step-by-Step Guide: Iterative Generation
+
+## 1. UI/UX Enhancements
+
+### a. Add “Refine”/“Regenerate” Actions
+- In your project file tree (e.g., in `ResultsDisplay.tsx`), add a button or context menu item labeled “Refine” or “Regenerate” next to each file and folder.
+- Add an “Extend Project” prompt box below or above the project tree for project-wide changes.
+
+### b. Prompt Modal
+- When a user clicks “Refine,” open a modal dialog with:
+  - The current file/folder name
+  - A textarea for the user’s new prompt (e.g., “Add error handling to this file”)
+  - “Submit” and “Cancel” buttons
+
+## 2. Frontend State & Logic
+
+### a. Track Context
+- When “Refine” is clicked, store:
+  - The selected file/folder path
+  - The current content (for files) or structure (for folders)
+- For “Extend Project,” store the entire project structure.
+
+### b. Send Request to AI Service
+- Update your `geminiService.ts` to accept:
+  - The user’s new prompt
+  - The current content/context (file, folder, or project)
+  - The target type (file/folder/project)
+
+- Example API call:
+  ```ts
+  geminiService.refine({
+    prompt: userPrompt,
+    context: fileContent, // or folder/project JSON
+    target: 'file', // or 'folder'/'project'
+    path: filePath // for files/folders
+  });
+  ```
+
+### c. Update Project State
+- On AI response:
+  - If refining a file: replace the file’s content in the project state.
+  - If refining a folder: update all files in that folder as returned by the AI.
+  - If extending the project: merge new/updated files into the project tree.
+
+## 3. Backend/AI Service Changes
+
+### a. Update geminiService.ts
+- Add a `refine` or `modify` method that:
+  - Accepts the prompt, context, target, and path.
+  - Constructs a prompt for Gemini like:
+    - For files:  
+      “Given this file: [file content], and this user request: [prompt], generate an improved version of the file.”
+    - For folders/projects:  
+      “Given this [folder/project] structure: [JSON], and this user request: [prompt], update accordingly.”
+- Send the request to Gemini and return the AI’s response.
+
+### b. Handle Large Contexts
+- If the file/folder/project is large, consider sending only the relevant part to the AI to avoid context window issues.
+
+## 4. Project History & Versioning
+
+### a. Save Each Iteration
+- After each refinement or extension, save the new project state to PocketBase as a new version or update the existing record with a version history log.
+
+### b. UI for Version History
+- Optionally, add a “History” button to let users view and revert to previous versions.
+
+## 5. User Feedback
+
+- Show loading indicators while waiting for the AI.
+- Display success or error toasts after each operation.
+- Optionally, show a diff view of changes before applying them.
+
+## 6. Testing
+
+- Test refining a single file, a folder, and the whole project.
+- Test with large projects and edge cases (e.g., empty files, binary files).
+- Test error handling (AI failure, network issues).
+
+## 7. Documentation
+
+- Update your in-app help and README to explain the new iterative generation features.
+
+---
+
+### Example User Flow
+
+1. User generates a project.
+2. User clicks “Refine” on `src/App.js`, enters: “Add error boundary.”
+3. Modal opens, user submits prompt.
+4. AI returns updated `App.js`; UI updates the file.
+5. User clicks “Extend Project,” enters: “Add a settings page.”
+6. AI returns new/updated files; UI merges them into the project.
+7. Each change is saved to project history.
+
+---
+
+## Optional: Advanced Features
+
+- Show a diff before applying AI changes.
+- Allow users to undo/redo refinements.
+- Support batch refinements (multiple files at once).
+</file>
+
+<file path="metadata.json">
+{
+  "name": "Prompt-to-Project Starter",
+  "description": "An AI-powered tool that turns your natural language project ideas into a complete, ready-to-run starter codebase using Gemini. Describe your app, choose your stack, and get a full project structure with code in seconds.",
+  "requestFramePermissions": []
+}
+</file>
+
+<file path="MIGRATION.md">
+# Migration Guide: localStorage to PocketBase
+
+This guide helps you migrate from the localStorage-based authentication to the new PocketBase backend.
+
+## What Changed?
+
+### Before (localStorage)
+- All data stored in browser localStorage
+- No real authentication security
+- Data only on one device
+- No email features
+- Manual data export needed for backup
+
+### After (PocketBase)
+- Data stored in PocketBase database
+- Secure authentication with JWT tokens
+- Access from multiple devices
+- Email verification and password reset
+- Automatic backups via PocketBase
+
+## Breaking Changes
+
+### 1. Data Structure
+
+**User Object:**
+```typescript
+// Old
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
+// New
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  created?: string;
+  updated?: string;
+}
+```
+
+**SavedProject Object:**
+```typescript
+// Old
+interface SavedProject {
+  id: string;
+  userId: string;
+  name: string;
+  options: ProjectOptions;
+  files: FileNode[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// New
+interface SavedProject {
+  id: string;
+  user: string;  // Changed from userId
+  name: string;
+  description?: string;  // New field
+  options: ProjectOptions;
+  files: FileNode[];
+  created?: string;  // Changed from createdAt
+  updated?: string;  // Changed from updatedAt
+}
+```
+
+### 2. Service Methods Now Async
+
+All service methods now return Promises:
+
+```typescript
+// Old (synchronous)
+const projects = projectHistoryService.getUserProjects(userId);
+projectHistoryService.deleteProject(projectId);
+
+// New (async)
+const projects = await projectHistoryService.getUserProjects(userId);
+await projectHistoryService.deleteProject(projectId);
+```
+
+### 3. Environment Variables Required
+
+Create `.env.local`:
+```bash
+VITE_GEMINI_API_KEY=your_key
+VITE_POCKETBASE_URL=http://127.0.0.1:8090
+```
+
+## Migration Steps
+
+### Step 1: Export Old Data (Optional)
+
+If you want to preserve localStorage data:
+
+```javascript
+// Run in browser console on the old version
+const users = localStorage.getItem('app-users');
+const projects = localStorage.getItem('saved-projects');
+const currentUser = localStorage.getItem('current-user');
+
+console.log('Users:', users);
+console.log('Projects:', projects);
+console.log('Current User:', currentUser);
+
+// Copy and save this data somewhere safe
+```
+
+### Step 2: Setup PocketBase
+
+Follow the [QUICKSTART.md](./QUICKSTART.md) guide to:
+1. Download and start PocketBase
+2. Create admin account
+3. Setup collections
+
+### Step 3: Install Dependencies
+
+```bash
+npm install
+```
+
+This will install the `pocketbase` package.
+
+### Step 4: Update Environment
+
+```bash
+cp .env.local.example .env.local
+# Edit .env.local with your keys
+```
+
+### Step 5: Start Fresh
+
+The new version doesn't automatically migrate localStorage data. Users will need to:
+1. Sign up again (same email works)
+2. Projects will be auto-saved going forward
+
+### Step 6: Import Old Projects (Manual)
+
+If you saved old data, you can manually recreate important projects by:
+1. Logging into the new system
+2. Using the project generator to recreate them
+3. They'll be auto-saved to PocketBase
+
+## Code Migration for Developers
+
+### Auth Service Changes
+
+```typescript
+// Old
+import { authService } from './services/authService';
+
+const user = authService.login(email, password);  // Sync
+authService.logout();
+
+// New
+import { authService } from './services/authService';
+
+const user = await authService.login(email, password);  // Async
+authService.logout();
+```
+
+### Project Service Changes
+
+```typescript
+// Old
+const project = projectHistoryService.saveProject(
+  userId, name, options, files
+);
+
+// New
+const project = await projectHistoryService.saveProject(
+  userId, name, options, files
+);
+```
+
+### Component Updates
+
+```typescript
+// Old
+useEffect(() => {
+  const projects = projectHistoryService.getUserProjects(user.id);
+  setProjects(projects);
+}, [user]);
+
+// New
+useEffect(() => {
+  const loadProjects = async () => {
+    try {
+      const projects = await projectHistoryService.getUserProjects(user.id);
+      setProjects(projects);
+    } catch (error) {
+      console.error('Failed to load projects:', error);
+    }
+  };
+  loadProjects();
+}, [user]);
+```
+
+## Rollback Instructions
+
+If you need to rollback to the localStorage version:
+
+```bash
+# Checkout the previous commit
+git checkout <previous-commit-hash>
+
+# Or if using branches
+git checkout main  # or whatever branch had the old version
+
+# Reinstall dependencies
+npm install
+
+# Run the old version
+npm run dev
+```
+
+## Testing the Migration
+
+1. **Test Auth:**
+   ```bash
+   npm run check:pb  # Should show PocketBase is running
+   ```
+
+2. **Test Registration:**
+   - Sign up with a new account
+   - Verify email received (if SMTP configured)
+
+3. **Test Projects:**
+   - Generate a project
+   - Check it appears in history
+   - Delete and verify it's removed
+
+4. **Test Persistence:**
+   - Close browser
+   - Open again
+   - Should still be logged in (if token not expired)
+
+## Common Issues
+
+### "Cannot connect to PocketBase"
+- Ensure PocketBase is running: `./pocketbase serve`
+- Check URL in `.env.local`
+
+### "Failed to save project"
+- Verify `projects` collection exists
+- Check API rules allow authenticated users to create
+- Look at PocketBase logs for errors
+
+### "Invalid token" after some time
+- Tokens expire after time
+- Re-login to get new token
+- This is normal security behavior
+
+## Benefits of New System
+
+✅ **Security**: Proper password hashing, JWT tokens  
+✅ **Multi-device**: Access from anywhere  
+✅ **Backup**: Database backups via PocketBase  
+✅ **Email**: Password reset, verification  
+✅ **Scalability**: Can handle many users  
+✅ **Admin UI**: Manage users and data  
+
+## Support
+
+- [README.md](./README.md) - Full documentation
+- [QUICKSTART.md](./QUICKSTART.md) - Quick setup guide
+- [pocketbase_schema.md](./pocketbase_schema.md) - Database schema
+- [PocketBase Docs](https://pocketbase.io/docs/) - Official docs
+</file>
+
+<file path="POCKETBASE_INTEGRATION.md">
+# PocketBase Integration Summary
+
+## Overview
+
+This document provides a comprehensive overview of the PocketBase integration into the Prompt-to-Project Starter application.
+
+## What is PocketBase?
+
+PocketBase is an open-source backend consisting of:
+- **Database**: Embedded SQLite (or PostgreSQL/MySQL)
+- **Authentication**: Built-in auth with multiple providers
+- **API**: RESTful API with real-time subscriptions
+- **Admin UI**: Web-based dashboard
+- **File Storage**: Built-in file handling
+- **Single Binary**: No dependencies, easy deployment
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        React Frontend                        │
+│  ┌────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │ Components │  │   Contexts   │  │    Services      │   │
+│  │            │  │              │  │                  │   │
+│  │ - AuthForm │  │ - AuthContext│  │ - authService    │   │
+│  │ - Project  │  │              │  │ - projectHistory │   │
+│  │   History  │  │              │  │   Service        │   │
+│  └────────────┘  └──────────────┘  └──────────────────┘   │
+│                          │                    │             │
+│                          └────────────────────┘             │
+│                                   │                         │
+└───────────────────────────────────┼─────────────────────────┘
+                                    │
+                          ┌─────────▼─────────┐
+                          │  PocketBase SDK   │
+                          │  (lib/pocketbase) │
+                          └─────────┬─────────┘
+                                    │ HTTP/REST
+                          ┌─────────▼─────────┐
+                          │   PocketBase      │
+                          │   Server          │
+                          │                   │
+                          │ - Auth API        │
+                          │ - Collections API │
+                          │ - Real-time       │
+                          └─────────┬─────────┘
+                                    │
+                          ┌─────────▼─────────┐
+                          │   SQLite DB       │
+                          │   (pb_data/)      │
+                          └───────────────────┘
+```
+
+## File Structure
+
+```
+/project
+├── lib/
+│   └── pocketbase.ts          # PocketBase client configuration
+├── services/
+│   ├── authService.ts          # Authentication operations
+│   ├── projectHistoryService.ts# Project CRUD operations
+│   └── geminiService.ts        # AI generation (unchanged)
+├── contexts/
+│   └── AuthContext.tsx         # Auth state management
+├── components/
+│   ├── AuthForm.tsx            # Login/signup UI
+│   ├── ProjectHistory.tsx      # Project list with async loading
+│   ├── SaveProjectDialog.tsx   # Save dialog
+│   └── Toast.tsx               # Notifications
+├── scripts/
+│   └── check-pocketbase.js     # Health check utility
+├── .env.local.example          # Environment variables template
+├── pocketbase_schema.md        # Database schema documentation
+├── QUICKSTART.md               # Quick setup guide
+├── MIGRATION.md                # Migration from localStorage
+└── README.md                   # Full documentation
+```
+
+## Collections Schema
+
+### users (Auth Collection)
+
+| Field  | Type   | Required | Notes                    |
+|--------|--------|----------|--------------------------|
+| id     | Text   | Auto     | UUID generated by PB     |
+| email  | Email  | Yes      | Unique, used for login   |
+| name   | Text   | Yes      | Display name             |
+| avatar | File   | No       | Profile picture          |
+| created| Date   | Auto     | Account creation         |
+| updated| Date   | Auto     | Last update              |
+
+**Built-in fields (inherited from auth collection):**
+- password (hashed)
+- emailVisibility
+- verified
+
+### projects (Base Collection)
+
+| Field       | Type     | Required | Notes                        |
+|-------------|----------|----------|------------------------------|
+| id          | Text     | Auto     | UUID generated by PB         |
+| user        | Relation | Yes      | Links to users collection    |
+| name        | Text     | Yes      | Project name (max 200 chars) |
+| description | Text     | No       | Short description (max 500)  |
+| options     | JSON     | Yes      | ProjectOptions object        |
+| files       | JSON     | Yes      | FileNode[] array             |
+| created     | Date     | Auto     | Creation timestamp           |
+| updated     | Date     | Auto     | Last update timestamp        |
+
+## API Endpoints
+
+### Authentication
+
+```
+POST   /api/collections/users/records
+       Body: { email, password, passwordConfirm, name }
+       Returns: User record
+
+POST   /api/collections/users/auth-with-password
+       Body: { identity, password }
+       Returns: { token, record }
+
+POST   /api/collections/users/auth-refresh
+       Returns: { token, record }
+
+POST   /api/collections/users/request-password-reset
+       Body: { email }
+
+POST   /api/collections/users/confirm-password-reset
+       Body: { token, password, passwordConfirm }
+```
+
+### Projects
+
+```
+GET    /api/collections/projects/records
+       Query: filter, sort, page, perPage
+       Returns: { items[], page, perPage, totalItems, totalPages }
+
+POST   /api/collections/projects/records
+       Body: { user, name, description, options, files }
+       Returns: Project record
+
+GET    /api/collections/projects/records/:id
+       Returns: Project record
+
+PATCH  /api/collections/projects/records/:id
+       Body: Partial project data
+       Returns: Updated project record
+
+DELETE /api/collections/projects/records/:id
+       Returns: 204 No Content
+```
+
+## Security Features
+
+### Authentication
+- ✅ Bcrypt password hashing
+- ✅ JWT token-based sessions
+- ✅ Token auto-refresh
+- ✅ Secure HTTP-only cookies (configurable)
+- ✅ CORS protection
+
+### Authorization
+- ✅ Row-level security via API rules
+- ✅ Users only access their own projects
+- ✅ Cascade delete on user removal
+- ✅ Request validation
+
+### API Rules
+
+**users collection:**
+- List: Authenticated users only
+- Create: Public (for registration)
+- Update: Own record only
+- Delete: Own record only
+
+**projects collection:**
+- List: `user = @request.auth.id`
+- Create: `@request.auth.id != "" && @request.data.user = @request.auth.id`
+- Update: `user = @request.auth.id`
+- Delete: `user = @request.auth.id`
+
+## Environment Variables
+
+```env
+# Required
+VITE_GEMINI_API_KEY=your_gemini_api_key
+
+# Optional (defaults to localhost)
+VITE_POCKETBASE_URL=http://127.0.0.1:8090
+```
+
+## Development Workflow
+
+### 1. Start PocketBase
+```bash
+./pocketbase serve
+```
+
+Runs on: http://127.0.0.1:8090
+
+### 2. Access Admin UI
+Open: http://127.0.0.1:8090/_/
+
+Create admin account on first visit.
+
+### 3. Verify Connection
+```bash
+npm run check:pb
+```
+
+### 4. Start Frontend
+```bash
+npm run dev
+```
+
+Runs on: http://localhost:3000
+
+## Production Deployment
+
+### PocketBase Deployment Options
+
+**1. Self-hosted VPS (Recommended)**
+```bash
+# Ubuntu/Debian
+wget https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_linux_amd64.zip
+unzip pocketbase_0.22.0_linux_amd64.zip
+chmod +x pocketbase
+
+# Create systemd service
+sudo nano /etc/systemd/system/pocketbase.service
+
+# Enable and start
+sudo systemctl enable pocketbase
+sudo systemctl start pocketbase
+```
+
+**2. Docker**
+```dockerfile
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
+COPY pocketbase /usr/local/bin/
+EXPOSE 8090
+CMD ["pocketbase", "serve", "--http=0.0.0.0:8090"]
+```
+
+**3. Cloud Platforms**
+- Railway (https://railway.app)
+- Render (https://render.com)
+- DigitalOcean App Platform
+- Fly.io
+
+### Frontend Deployment
+
+Build and deploy to:
+- Vercel
+- Netlify
+- Cloudflare Pages
+- AWS S3 + CloudFront
+
+```bash
+npm run build
+# Upload dist/ folder to hosting
+```
+
+### Production Checklist
+
+- [ ] Enable HTTPS on PocketBase
+- [ ] Configure SMTP for emails
+- [ ] Set up database backups
+- [ ] Configure CORS for frontend domain
+- [ ] Update `VITE_POCKETBASE_URL` to production URL
+- [ ] Enable rate limiting
+- [ ] Monitor PocketBase logs
+- [ ] Set up SSL certificates
+- [ ] Configure firewall rules
+
+## Monitoring & Maintenance
+
+### Health Check
+```bash
+curl http://127.0.0.1:8090/api/health
+```
+
+### Logs
+PocketBase logs to stdout. For production:
+```bash
+./pocketbase serve > logs/app.log 2>&1
+```
+
+### Backups
+
+**Automatic (Built-in):**
+PocketBase creates automatic backups in `pb_data/backups/`
+
+**Manual:**
+```bash
+# Backup
+cp -r pb_data/ pb_data_backup_$(date +%Y%m%d)
+
+# Restore
+./pocketbase serve --dataDir=pb_data_backup_20240101
+```
+
+### Database Management
+
+Access SQLite directly:
+```bash
+sqlite3 pb_data/data.db
+.tables
+.schema projects
+SELECT COUNT(*) FROM projects;
+```
+
+## Troubleshooting
+
+### Issue: Cannot connect to PocketBase
+**Solution:**
+- Verify PocketBase is running: `ps aux | grep pocketbase`
+- Check port: `netstat -an | grep 8090`
+- Test endpoint: `curl http://127.0.0.1:8090/api/health`
+
+### Issue: Authentication fails
+**Solution:**
+- Clear browser localStorage
+- Check PocketBase logs
+- Verify users collection exists
+- Test with admin UI first
+
+### Issue: Projects not saving
+**Solution:**
+- Verify projects collection exists
+- Check API rules are correct
+- Look at network tab in browser dev tools
+- Check PocketBase logs for errors
+
+### Issue: CORS errors in production
+**Solution:**
+```bash
+# Start PocketBase with CORS origin
+./pocketbase serve --origins="https://yourdomain.com"
+```
+
+## Performance Considerations
+
+### Database
+- SQLite handles ~100k requests/day easily
+- For more, use PostgreSQL/MySQL
+- Add indexes on frequently queried fields
+
+### Caching
+- PocketBase caches API responses
+- Browser caches auth tokens
+- Consider CDN for static assets
+
+### Optimization
+- Use pagination for large datasets
+- Implement search debouncing
+- Lazy load project history
+- Compress large JSON fields
+
+## Additional Resources
+
+- **PocketBase Docs**: https://pocketbase.io/docs/
+- **API Reference**: https://pocketbase.io/docs/api-records/
+- **GitHub**: https://github.com/pocketbase/pocketbase
+- **Discord Community**: https://discord.gg/pocketbase
+
+## Summary
+
+✅ **Secure**: Proper authentication and authorization  
+✅ **Scalable**: Can handle production workloads  
+✅ **Simple**: Single binary, easy deployment  
+✅ **Feature-rich**: Auth, database, API, admin UI  
+✅ **Open Source**: MIT licensed, self-hostable  
+✅ **Developer-friendly**: Great DX, good documentation  
+
+The PocketBase integration transforms this from a demo app into a production-ready application with proper security, persistence, and multi-user support.
+</file>
+
+<file path="pocketbase_schema.md">
+# PocketBase Schema Setup
+
+This document describes the required PocketBase collections and their configuration.
+
+## Collections
+
+### 1. users (auth collection)
+
+This is the default auth collection. Enable these options:
+
+**Collection Name:** `users`  
+**Type:** Auth
+
+**Fields:**
+- `email` (Email) - Required, Unique
+- `name` (Text) - Required
+- `avatar` (File) - Optional, single file
+
+**Options:**
+- Enable "Email/Password authentication"
+- Enable "Email visibility"
+- Optional: Enable "Email verification" for production
+
+**API Rules:**
+- List/View: `@request.auth.id != ""`
+- Create: Public (anyone can register)
+- Update: `@request.auth.id = id`
+- Delete: `@request.auth.id = id`
+
+### 2. projects (base collection)
+
+**Collection Name:** `projects`  
+**Type:** Base
+
+**Fields:**
+- `user` (Relation) - Required
+  - Collection: users
+  - Type: Single
+  - Cascade delete: Yes
+- `name` (Text) - Required
+  - Min: 1, Max: 200
+- `description` (Text) - Optional
+  - Max: 500
+- `options` (JSON) - Required
+  - Stores ProjectOptions
+- `files` (JSON) - Required
+  - Stores FileNode[]
+
+**API Rules:**
+- List/View: `user = @request.auth.id`
+- Create: `@request.auth.id != "" && @request.data.user = @request.auth.id`
+- Update: `user = @request.auth.id`
+- Delete: `user = @request.auth.id`
+
+## Quick Setup
+
+### Using PocketBase Admin UI
+
+1. Start PocketBase:
+   ```bash
+   ./pocketbase serve
+   ```
+
+2. Open http://127.0.0.1:8090/_/ in your browser
+
+3. Create an admin account
+
+4. Create the collections:
+   - The `users` collection already exists by default
+   - Create the `projects` collection with the fields and rules above
+
+### Using PocketBase Import (Alternative)
+
+If you have a `pb_schema.json` file, you can import it:
+
+```bash
+./pocketbase migrate collections pb_schema.json
+```
+
+## Email Configuration (Optional but Recommended)
+
+For production, configure SMTP in PocketBase settings:
+
+1. Go to Settings > Mail settings
+2. Configure your SMTP provider (Gmail, SendGrid, Mailgun, etc.)
+3. Enable email verification and password reset features
+
+## Test the Setup
+
+After setup, test the API:
+
+```bash
+# Register a user
+curl -X POST http://127.0.0.1:8090/api/collections/users/records \\
+  -H "Content-Type: application/json" \\
+  -d '{"email":"test@example.com","password":"12345678","passwordConfirm":"12345678","name":"Test User"}'
+
+# Login
+curl -X POST http://127.0.0.1:8090/api/collections/users/auth-with-password \\
+  -H "Content-Type: application/json" \\
+  -d '{"identity":"test@example.com","password":"12345678"}'
+```
+</file>
+
+<file path="QUICKSTART.md">
+# Quick Start Guide
+
+Get up and running in 5 minutes!
+
+## Prerequisites
+
+- Node.js v18+ installed
+- Terminal/Command line access
+
+## Step 1: Install Dependencies
+
+```bash
+npm install
+```
+
+## Step 2: Setup PocketBase
+
+### Download PocketBase
+
+**macOS/Linux:**
+```bash
+# Download and extract PocketBase
+curl -L https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_darwin_amd64.zip -o pb.zip
+unzip pb.zip
+rm pb.zip
+
+# Make it executable
+chmod +x pocketbase
+```
+
+**Windows:**
+Download from: https://github.com/pocketbase/pocketbase/releases/latest
+
+### Start PocketBase
+
+```bash
+./pocketbase serve
+```
+
+**First time setup:**
+1. Open http://127.0.0.1:8090/_/
+2. Create an admin account
+3. You'll see the admin dashboard
+
+### Create the Projects Collection
+
+In the PocketBase admin UI:
+
+1. Click **"Collections"** in the sidebar
+2. Click **"New collection"** → Choose **"Base collection"**
+3. Name it **`projects`**
+
+4. Add these fields:
+
+   **Field 1: user (Relation)**
+   - Type: Relation
+   - Collection: users
+   - Type: Single
+   - Required: Yes
+   - Check "Cascade delete"
+
+   **Field 2: name (Text)**
+   - Type: Text
+   - Required: Yes
+   - Min: 1, Max: 200
+
+   **Field 3: description (Text)**
+   - Type: Text
+   - Required: No
+   - Max: 500
+
+   **Field 4: options (JSON)**
+   - Type: JSON
+   - Required: Yes
+
+   **Field 5: files (JSON)**
+   - Type: JSON
+   - Required: Yes
+
+5. Click **"API Rules"** tab and set:
+   - **List/View**: `user = @request.auth.id`
+   - **Create**: `@request.auth.id != "" && @request.data.user = @request.auth.id`
+   - **Update**: `user = @request.auth.id`
+   - **Delete**: `user = @request.auth.id`
+
+6. Click **"Create"**
+
+## Step 3: Configure Environment
+
+```bash
+# Copy the example file
+cp .env.local.example .env.local
+
+# Edit .env.local and add your keys
+# VITE_GEMINI_API_KEY=your_actual_api_key_here
+# VITE_POCKETBASE_URL=http://127.0.0.1:8090
+```
+
+Get your Gemini API key from: https://aistudio.google.com/apikey
+
+## Step 4: Verify PocketBase Connection
+
+```bash
+npm run check:pb
+```
+
+You should see: ✅ PocketBase is running!
+
+## Step 5: Start the App
+
+```bash
+npm run dev
+```
+
+Visit: http://localhost:3000
+
+## Step 6: Create Your First Account
+
+1. Click "Sign up" on the login screen
+2. Enter your email, name, and password
+3. You're in! Start generating projects
+
+## Troubleshooting
+
+### Can't connect to PocketBase?
+
+**Check if PocketBase is running:**
+```bash
+curl http://127.0.0.1:8090/api/health
+```
+
+Should return: `{"code":200,"message":"API is healthy."}`
+
+**Common issues:**
+- PocketBase not started: Run `./pocketbase serve`
+- Wrong URL in `.env.local`: Check `VITE_POCKETBASE_URL`
+- Port 8090 in use: PocketBase will show an error, try a different port
+
+### Projects not saving?
+
+1. Check you're logged in
+2. Verify the `projects` collection exists in PocketBase admin
+3. Check the API rules are set correctly
+4. Look at browser console for errors (F12)
+
+### Registration failing?
+
+- Email might already be registered
+- Password too short (PocketBase requires 8+ characters)
+- Check PocketBase logs in the terminal
+
+## Next Steps
+
+- Generate your first project!
+- Check out the project history button (clock icon)
+- Save projects with custom names
+- Try the dark mode toggle
+
+## Need Help?
+
+- Full documentation: [README.md](./README.md)
+- PocketBase docs: https://pocketbase.io/docs/
+- Schema details: [pocketbase_schema.md](./pocketbase_schema.md)
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "module": "ESNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}
+</file>
+
+<file path="VALDI_MIGRATION.md">
+# Valdi macOS Native App Migration
+
+## Overview
+Migrating PromptToProject from React web app to native macOS application using Valdi framework.
+
+## Valdi Framework
+- **Repository**: https://github.com/Snapchat/Valdi
+- **Status**: Beta (8 years production at Snap)
+- **License**: MIT
+- **Platforms**: iOS, Android, macOS
+
+## Key Features
+- TypeScript/TSX components → Native views (no web views)
+- Instant hot reload (milliseconds)
+- Full VSCode debugging
+- C++ layout engine with Flexbox
+- Native performance
+
+## Installation Steps
+
+### 1. Install Valdi CLI
+```bash
+npm install -g @snap/valdi
+```
+
+### 2. Setup Development Environment
+```bash
+valdi dev_setup  # Installs Xcode, Homebrew, dependencies (10-20 min)
+valdi doctor     # Verify installation
+```
+
+### 3. Bootstrap Project
+```bash
+mkdir valdi-macos && cd valdi-macos
+valdi bootstrap
+```
+
+### 4. Generate macOS Xcode Project
+```bash
+./buckw project --ide xcode valdi:valdi-desktop-apple
+open valdi/valdi-desktop-apple.xcworkspace
+```
+
+## Architecture
+
+### Build System
+- **Buck** (not Bazel) for desktop builds
+- Xcode workspace generation
+- Native .app bundle output
+
+### Entry Points
+- `main.m` - macOS app entry
+- `AppDelegate.m` - App lifecycle
+- `Info.plist` - App configuration
+
+### Rendering
+- NSView-based (valdi/src/valdi/macos/)
+- Metal graphics backend
+- Automatic view recycling
+
+### Components
+```tsx
+import { Component } from 'valdi_core/src/Component';
+
+class Example extends Component {
+  onRender() {
+    <view backgroundColor='#FFFFFF' padding={20}>
+      <label value='Hello macOS' />
+    </view>;
+  }
+}
+```
+
+## Migration Plan
+
+### Phase 1: Setup & Verification
+- [x] Research Valdi framework
+- [x] Document architecture
+- [ ] Install Valdi CLI
+- [ ] Create test project
+- [ ] Verify macOS build
+
+### Phase 2: Core UI Components
+- [ ] Port layout components
+- [ ] Port form inputs
+- [ ] Port buttons
+- [ ] Port project display
+
+### Phase 3: Business Logic
+- [ ] Integrate Gemini API (native HTTP)
+- [ ] Implement PocketBase auth
+- [ ] Port project generation logic
+- [ ] Add file system access
+
+### Phase 4: Native Features
+- [ ] macOS menu bar
+- [ ] Native file dialogs
+- [ ] System notifications
+- [ ] Keyboard shortcuts
+
+### Phase 5: Testing & Polish
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] Performance optimization
+- [ ] Build .app bundle
+
+## Component Mapping
+
+### React → Valdi
+- `<div>` → `<view>`
+- `<input>` → `<textfield>`
+- `<button>` → `<button>`
+- `<span>` → `<label>`
+- CSS → Flexbox props
+
+## API Integration
+
+### Gemini API
+- Use native fetch or URLSession
+- No CORS issues (native app)
+- Direct API calls
+
+### PocketBase
+- HTTP client for REST API
+- JWT token storage (Keychain)
+- Real-time subscriptions via WebSocket
+
+## File Structure
+```
+valdi-macos/
+├── src/
+│   ├── components/     # Valdi components
+│   ├── services/       # API services
+│   ├── utils/          # Helpers
+│   └── App.tsx         # Root component
+├── valdi/
+│   └── standalone_desktop/  # macOS app files
+├── BUILD.bazel         # Build config
+└── WORKSPACE           # Dependencies
+```
+
+## Development Workflow
+1. Edit TypeScript/TSX files
+2. Hot reload updates instantly
+3. Debug in VSCode with breakpoints
+4. Build via Xcode for distribution
+
+## Resources
+- [Valdi Docs](https://github.com/Snapchat/Valdi/tree/main/docs)
+- [Getting Started](https://github.com/Snapchat/Valdi/blob/main/docs/INSTALL.md)
+- [Discord](https://discord.gg/uJyNEeYX2U)
+</file>
+
+<file path="vite.config.ts">
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, '.', '');
+    return {
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+      },
+      plugins: [react()],
+      define: {
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, '.'),
+        }
+      }
+    };
+});
+</file>
+
+<file path="components/ProjectHistory.tsx">
+import React, { useState, useEffect } from 'react';
+import { SavedProject } from '../types';
+import { projectHistoryService } from '../services/projectHistoryService';
+import { useAuth } from '../contexts/AuthContext';
+
+interface ProjectHistoryProps {
+  onLoadProject: (project: SavedProject) => void;
+  onClose: () => void;
+}
+
+export const ProjectHistory: React.FC<ProjectHistoryProps> = ({ onLoadProject, onClose }) => {
+  const { user } = useAuth();
+  const [projects, setProjects] = useState<SavedProject[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      if (user) {
+        try {
+          setIsLoading(true);
+          const userProjects = await projectHistoryService.getUserProjects(user.id);
+          setProjects(userProjects);
+        } catch (error) {
+          console.error('Failed to load projects:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadProjects();
+  }, [user]);
+
+  const handleDelete = async (projectId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this project?')) {
+      try {
+        await projectHistoryService.deleteProject(projectId);
+        setProjects(projects.filter(p => p.id !== projectId));
+      } catch (error) {
+        console.error('Failed to delete project:', error);
+        alert('Failed to delete project. Please try again.');
+      }
+    }
+  };
+
+  const filteredProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.options.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      
+      <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transform transition-transform">
+        <div className="h-full flex flex-col">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-black dark:text-white">Project History</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading projects...</p>
+              </div>
+            ) : filteredProjects.length === 0 ? (
+              <div className="text-center py-12">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No projects</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  {searchTerm ? 'No projects match your search.' : 'Get started by generating your first project.'}
+                </p>
+              </div>
+            ) : (
+              filteredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  onClick={() => onLoadProject(project)}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-500 dark:hover:border-indigo-500 cursor-pointer transition-colors bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-black dark:text-white truncate mb-1">
+                        {project.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                        {project.options.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200">
+                          {project.options.stack}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
+                          {project.options.pattern}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-500">
+                        {formatDate(project.created || new Date().toISOString())}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => handleDelete(project.id, e)}
+                      className="ml-4 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                      aria-label="Delete project"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+</file>
+
+<file path="contexts/AuthContext.tsx">
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User } from '../types';
+import { authService } from '../services/authService';
+import { pb } from '../lib/pocketbase';
+
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const currentUser = authService.getCurrentUser();
+      
+      if (currentUser) {
+        const refreshedUser = await authService.refreshAuth();
+        setUser(refreshedUser);
+      }
+      
+      setIsLoading(false);
+    };
+
+    initAuth();
+
+    const unsubscribe = pb.authStore.onChange((token, model) => {
+      if (model) {
+        setUser({
+          id: model.id,
+          email: model.email,
+          name: model.name,
+          avatar: model.avatar,
+          created: model.created,
+          updated: model.updated,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const user = await authService.login(email, password);
+    setUser(user);
+  };
+
+  const register = async (email: string, password: string, name: string) => {
+    const user = await authService.register(email, password, name);
+    await authService.login(email, password);
+    setUser(user);
+  };
+
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+</file>
+
+<file path="services/authService.ts">
+import { User } from '../types';
+import { pb } from '../lib/pocketbase';
+
+export const authService = {
+  register: async (email: string, password: string, name: string): Promise<User> => {
+    try {
+      const data = {
+        email,
+        password,
+        passwordConfirm: password,
+        name,
+        emailVisibility: true,
+      };
+
+      const record = await pb.collection('users').create(data);
+      
+      await pb.collection('users').requestVerification(email);
+
+      return {
+        id: record.id,
+        email: record.email,
+        name: record.name,
+        avatar: record.avatar,
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch (error: any) {
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.email) {
+          throw new Error('This email is already registered');
+        }
+        throw new Error(errorData.message || 'Registration failed');
+      }
+      throw new Error(error?.message || 'Registration failed');
+    }
+  },
+
+  login: async (email: string, password: string): Promise<User> => {
+    try {
+      const authData = await pb.collection('users').authWithPassword(email, password);
+      
+      return {
+        id: authData.record.id,
+        email: authData.record.email,
+        name: authData.record.name,
+        avatar: authData.record.avatar,
+        created: authData.record.created,
+        updated: authData.record.updated,
+      };
+    } catch (error: any) {
+      throw new Error('Invalid email or password');
+    }
+  },
+
+  logout: () => {
+    pb.authStore.clear();
+  },
+
+  getCurrentUser: (): User | null => {
+    if (!pb.authStore.isValid || !pb.authStore.model) {
+      return null;
+    }
+
+    const model = pb.authStore.model;
+    return {
+      id: model.id,
+      email: model.email,
+      name: model.name,
+      avatar: model.avatar,
+      created: model.created,
+      updated: model.updated,
+    };
+  },
+
+  updateUser: async (userId: string, data: Partial<User>): Promise<User> => {
+    try {
+      const record = await pb.collection('users').update(userId, data);
+      
+      return {
+        id: record.id,
+        email: record.email,
+        name: record.name,
+        avatar: record.avatar,
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to update user');
+    }
+  },
+
+  refreshAuth: async (): Promise<User | null> => {
+    try {
+      if (!pb.authStore.isValid) {
+        return null;
+      }
+
+      const authData = await pb.collection('users').authRefresh();
+      
+      return {
+        id: authData.record.id,
+        email: authData.record.email,
+        name: authData.record.name,
+        avatar: authData.record.avatar,
+        created: authData.record.created,
+        updated: authData.record.updated,
+      };
+    } catch {
+      pb.authStore.clear();
+      return null;
+    }
+  },
+
+  requestPasswordReset: async (email: string): Promise<void> => {
+    try {
+      await pb.collection('users').requestPasswordReset(email);
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to send password reset email');
+    }
+  },
+
+  confirmPasswordReset: async (
+    token: string,
+    password: string,
+    passwordConfirm: string
+  ): Promise<void> => {
+    try {
+      await pb.collection('users').confirmPasswordReset(
+        token,
+        password,
+        passwordConfirm
+      );
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to reset password');
+    }
+  },
+};
+</file>
+
+<file path="services/geminiService.ts">
+import { GoogleGenAI } from "@google/genai";
+import { FileNode, ProjectOptions } from '../types';
+
+if (!process.env.API_KEY) {
+  throw new Error("API_KEY environment variable not set");
+}
+
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+const createSystemInstruction = () => {
+  return `You are an expert software architect and senior full-stack engineer. Your task is to act as a "Prompt-to-Project" generator. You will receive a natural language description of a web application, along with optional technical preferences. Based on this input, you must generate a complete, well-structured, and ready-to-run starter project codebase.
+
+Your output MUST be a single, valid JSON object representing an array of file and folder nodes for the project's root directory. Do not add any explanatory text before or after the JSON object.
+
+- A 'file' node must have the structure: \`{ "type": "file", "name": "filename.ext", "content": "file content as a string" }\`.
+- A 'folder' node must have the structure: \`{ "type": "folder", "name": "folder_name", "children": [...] }\`, where 'children' is an array of file or folder nodes.
+- All file content must be properly escaped as a single string within the JSON.
+
+**CRITICAL RULES:**
+1.  **Analyze and Infer:** Deeply analyze the user's prompt to understand core entities, features, and user flows. Infer a logical file and directory structure for a modern web application based on the requested stack.
+2.  **Generate High-Quality Code:** Generate idiomatic, high-quality code for each file. The code must be functional, commented where necessary, and follow best practices for the chosen technologies.
+3.  **No Placeholders:** Do not generate placeholder or "TODO" code. Generate real, working sample code that implements a basic version of the requested features. For example, if asked for a task tracker, generate files for a 'Task' model, API endpoints to list/create tasks, and a simple UI to display them.
+4.  **Essential Configs:** Include essential configuration files like \`package.json\` (with relevant dependencies), \`.gitignore\`, \`.env.example\`, and any framework-specific config files (e.g., \`tsconfig.json\`, \`next.config.js\`).
+5.  **Comprehensive README:** Generate a detailed \`README.md\` that explains the project, setup instructions, how to run it locally, and an overview of the architecture.`;
+};
+
+const createUserPrompt = (options: ProjectOptions) => {
+  const stackInfo = options.stack === 'Custom'
+    ? `- **Custom Stack:**\n  - **Frontend:** ${options.frontend}\n  - **Backend:** ${options.backend}`
+    : `- **Stack:** ${options.stack}`;
+
+  return `Generate a complete starter project based on the following requirements.
+
+**Project Description:**
+${options.description}
+
+**Technical Preferences:**
+${stackInfo}
+- **Architecture Pattern:** ${options.pattern}
+- **Authentication:** ${options.auth}
+- **Testing Framework:** ${options.testing}
+- **Infrastructure:** ${options.infra}
+
+Remember to return ONLY the JSON object representing the file structure.`;
+};
+
+export const generateProjectStructure = async (options: ProjectOptions): Promise<FileNode[]> => {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: createUserPrompt(options),
+      config: {
+        systemInstruction: createSystemInstruction(),
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 32768 }
+      },
+    });
+
+    const jsonText = response.text.trim();
+    
+    // Basic validation to ensure we have what looks like an array
+    if (!jsonText.startsWith('[') || !jsonText.endsWith(']')) {
+        throw new Error('Invalid JSON response from API. Expected a root array.');
+    }
+    
+    const parsedJson = JSON.parse(jsonText);
+
+    // Further validation could be added here to check the structure of FileNode
+    if (!Array.isArray(parsedJson)) {
+        throw new Error('Parsed JSON is not an array as expected.');
+    }
+    
+    return parsedJson as FileNode[];
+
+  } catch (error) {
+    console.error("Error calling Gemini API:", error);
+    if (error instanceof Error) {
+        throw new Error(`Failed to generate project structure: ${error.message}`);
+    }
+    throw new Error("An unknown error occurred while communicating with the Gemini API.");
+  }
+};
+</file>
+
+<file path="services/projectHistoryService.ts">
+import { SavedProject, ProjectOptions, FileNode } from '../types';
+import { pb } from '../lib/pocketbase';
+
+export const projectHistoryService = {
+  saveProject: async (
+    userId: string,
+    name: string,
+    options: ProjectOptions,
+    files: FileNode[]
+  ): Promise<SavedProject> => {
+    try {
+      const data = {
+        user: userId,
+        name,
+        description: options.description.slice(0, 200),
+        options: JSON.stringify(options),
+        files: JSON.stringify(files),
+      };
+
+      const record = await pb.collection('projects').create(data);
+
+      return {
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to save project');
+    }
+  },
+
+  getUserProjects: async (userId: string): Promise<SavedProject[]> => {
+    try {
+      const records = await pb.collection('projects').getFullList({
+        filter: `user = "${userId}"`,
+        sort: '-created',
+      });
+
+      return records.map(record => ({
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      }));
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to fetch projects');
+    }
+  },
+
+  getProject: async (projectId: string): Promise<SavedProject | null> => {
+    try {
+      const record = await pb.collection('projects').getOne(projectId);
+
+      return {
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch {
+      return null;
+    }
+  },
+
+  deleteProject: async (projectId: string): Promise<void> => {
+    try {
+      await pb.collection('projects').delete(projectId);
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to delete project');
+    }
+  },
+
+  updateProject: async (
+    projectId: string,
+    updates: Partial<SavedProject>
+  ): Promise<SavedProject | null> => {
+    try {
+      const data: any = {};
+      
+      if (updates.name) data.name = updates.name;
+      if (updates.description) data.description = updates.description;
+      if (updates.options) data.options = JSON.stringify(updates.options);
+      if (updates.files) data.files = JSON.stringify(updates.files);
+
+      const record = await pb.collection('projects').update(projectId, data);
+
+      return {
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      };
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to update project');
+    }
+  },
+
+  searchProjects: async (userId: string, query: string): Promise<SavedProject[]> => {
+    try {
+      const records = await pb.collection('projects').getFullList({
+        filter: `user = "${userId}" && (name ~ "${query}" || description ~ "${query}")`,
+        sort: '-created',
+      });
+
+      return records.map(record => ({
+        id: record.id,
+        user: record.user,
+        name: record.name,
+        description: record.description,
+        options: JSON.parse(record.options),
+        files: JSON.parse(record.files),
+        created: record.created,
+        updated: record.updated,
+      }));
+    } catch (error: any) {
+      throw new Error(error?.message || 'Failed to search projects');
+    }
+  },
+};
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# PocketBase
+pb_data/
+pb_migrations/
+pocketbase
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+</file>
+
+<file path="FEATURE_SUMMARY.md">
+# Feature Summary: Authentication & Project History with PocketBase
+
+## Overview
+This update implements a comprehensive user-centered UX by adding authentication and project history management using PocketBase as a real backend for the Prompt-to-Project Starter application.
+
+## New Features
+
+### 1. User Authentication (PocketBase)
+- **Sign Up/Login System**: Users can create accounts with email, password, and name
+- **Secure Authentication**: PocketBase handles password hashing, JWT tokens, and sessions
+- **Session Persistence**: Auth tokens stored in cookies with auto-refresh
+- **Auth Context**: Global authentication state management using React Context
+- **Logout Functionality**: Users can safely logout from the application
+- **Email Verification**: Optional email verification for new accounts
+- **Password Reset**: Email-based password recovery (requires SMTP configuration)
+
+### 2. Project History (Cloud Storage)
+- **Auto-Save**: Projects are automatically saved to PocketBase after generation
+- **Browse History**: View all previously generated projects from the database
+- **Search Projects**: Server-side search by name or description
+- **Load Projects**: Reload any saved project with one click
+- **Delete Projects**: Remove unwanted projects from the database
+- **Update Projects**: Manually save/rename projects with version tracking
+- **Multi-device Sync**: Access projects from any device
+
+### 3. Enhanced User Interface
+- **User Profile Display**: Shows logged-in user's name in header
+- **Project History Button**: Quick access to saved projects with loading states
+- **Save Project Button**: Manual save with custom naming
+- **Toast Notifications**: Success/error feedback for user actions
+- **Loading States**: Proper loading indicators for async operations
+- **Responsive Design**: All components work on mobile and desktop
+
+## Technical Implementation
+
+### New Files Created
+
+#### Components
+- `components/AuthForm.tsx` - Login/signup form with validation
+- `components/ProjectHistory.tsx` - Project history sidebar with async loading
+- `components/SaveProjectDialog.tsx` - Modal for naming/saving projects
+- `components/Toast.tsx` - Toast notification component
+
+#### Contexts
+- `contexts/AuthContext.tsx` - React context for authentication with PocketBase integration
+
+#### Services
+- `services/authService.ts` - PocketBase authentication (register, login, refresh, password reset)
+- `services/projectHistoryService.ts` - PocketBase CRUD operations for projects
+
+#### Configuration
+- `lib/pocketbase.ts` - PocketBase client configuration
+- `.env.local.example` - Environment variables template
+- `pocketbase_schema.md` - Database schema documentation
+
+### Modified Files
+- `App.tsx` - Integrated auth and async project history features
+- `index.tsx` - Wrapped app with AuthProvider
+- `types.ts` - Updated User and SavedProject interfaces for PocketBase
+- `index.html` - Added toast animation styles
+- `README.md` - Complete setup guide for PocketBase
+- `package.json` - Added pocketbase dependency
+
+## PocketBase Backend
+
+### Collections
+
+#### users (auth collection)
+- Built-in PocketBase auth collection
+- Email/password authentication
+- Fields: email, name, avatar
+- Auto-generated: id, created, updated
+
+#### projects (base collection)
+- Relation to users (cascade delete)
+- Fields: user, name, description, options (JSON), files (JSON)
+- Auto-generated: id, created, updated
+- API rules ensure users only access their own projects
+
+### Authentication Flow
+1. User registers → PocketBase creates account with hashed password
+2. Login → PocketBase returns JWT token stored in cookies
+3. All API calls include auth token automatically
+4. Token auto-refreshes before expiration
+5. Logout → Token cleared from storage
+
+### Data Storage
+- **Database**: SQLite (default) or PostgreSQL/MySQL
+- **Users**: Passwords hashed with bcrypt
+- **Projects**: Stored as JSON in database with full relational integrity
+- **Files**: Project files stored as JSON within project records
+
+## User Flow
+
+1. **First Visit**: User sees login/signup screen
+2. **Sign Up**: User creates account (stored in PocketBase)
+3. **Email Verification**: Optional verification email sent
+4. **Login**: User authenticates and receives JWT token
+5. **Main App**: After authentication, user can generate projects
+6. **Auto-Save**: Generated projects saved to PocketBase database
+7. **Project History**: Users can browse, search, and reload past projects from cloud
+8. **Manual Save**: Users can rename projects via the save button
+9. **Multi-device**: Projects accessible from any device
+10. **Logout**: User logs out, token cleared
+
+## Security Features
+
+✅ **Implemented**:
+- Password hashing (bcrypt via PocketBase)
+- JWT token-based authentication
+- HTTP-only cookies for token storage
+- Token auto-refresh mechanism
+- API authorization rules (users only access their own data)
+- CORS configuration in PocketBase
+- SQL injection protection (ORM-based queries)
+
+⚠️ **Recommended for Production**:
+- Enable HTTPS (TLS/SSL certificates)
+- Configure SMTP for email verification
+- Set up rate limiting
+- Enable PocketBase backups
+- Configure proper CORS origins
+- Use environment-specific API URLs
+
+## API Endpoints (via PocketBase)
+
+### Authentication
+- `POST /api/collections/users/records` - Register
+- `POST /api/collections/users/auth-with-password` - Login
+- `POST /api/collections/users/auth-refresh` - Refresh token
+- `POST /api/collections/users/request-password-reset` - Request reset
+- `POST /api/collections/users/confirm-password-reset` - Confirm reset
+- `POST /api/collections/users/request-verification` - Request email verification
+
+### Projects
+- `GET /api/collections/projects/records` - List user's projects
+- `POST /api/collections/projects/records` - Create project
+- `GET /api/collections/projects/records/:id` - Get project
+- `PATCH /api/collections/projects/records/:id` - Update project
+- `DELETE /api/collections/projects/records/:id` - Delete project
+
+## Development Setup
+
+1. Download PocketBase from https://pocketbase.io/docs/
+2. Run `./pocketbase serve`
+3. Create admin account at http://127.0.0.1:8090/_/
+4. Configure collections (see pocketbase_schema.md)
+5. Copy `.env.local.example` to `.env.local`
+6. Set `VITE_POCKETBASE_URL` and `VITE_GEMINI_API_KEY`
+7. Run `npm install && npm run dev`
+
+## Production Deployment
+
+### PocketBase Options:
+- Self-hosted VPS (Ubuntu/Debian with systemd)
+- Docker container
+- PocketBase Cloud (when available)
+- Railway, Render, DigitalOcean App Platform
+
+### Frontend Options:
+- Vercel, Netlify, Cloudflare Pages
+- AWS S3 + CloudFront
+- Any static hosting service
+
+## Future Enhancements
+- OAuth providers (Google, GitHub) via PocketBase
+- Real-time collaboration on projects
+- Project templates and favorites
+- Project versioning with history
+- Team workspaces and sharing
+- Advanced search with filters
+- Export/import project collections
+- Usage analytics and insights
+- File attachments for projects
+- Comments and annotations
+</file>
+
+<file path="index.tsx">
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { AuthProvider } from './contexts/AuthContext';
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>
+);
+</file>
+
+<file path="package.json">
+{
+  "name": "prompt-to-project-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check:pb": "node scripts/check-pocketbase.js"
+  },
+  "dependencies": {
+    "@google/genai": "^1.29.0",
+    "pocketbase": "^0.26.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
+</file>
+
+<file path="valdi-macos/.bazelrc">
+# No bzlmod yet
+common --noenable_bzlmod
+
+common --bes_instance_name=client
+common --enable_platform_specific_config
+
+# Disable workers for repo fetching to prevent OOM
+common --experimental_worker_for_repo_fetching=off
+
+# android configuration
+# Expose AndroidResourceInfo provider to Kotlin rules
+common --experimental_google_legacy_api=true
+common --experimental_enable_android_migration_apis=true
+common --incompatible_java_common_parameters=false
+
+# Flags for compilation
+common --define enable_web=true
+
+build --tool_java_language_version=11
+build --java_language_version=11
+
+## Disable sandboxing for macs, both laptops and in CI; the performance hit is much too high.
+build:macos --spawn_strategy=local
+build:linux --sandbox_writable_path=/var/tmp
+
+# common cc configuration
+build --cxxopt=-std=c++20
+build --cxxopt=-Wno-ambiguous-reversed-operator
+build --cxxopt=-D_LIBCPP_ENABLE_CXX20_REMOVED_TYPE_TRAITS
+build --host_cxxopt=-std=c++20
+
+## we need to disable this due to a bug in bazel
+## see https://github.com/bazelbuild/bazel/issues/12381
+build --incompatible_use_specific_tool_files=false
+build --incompatible_enable_cc_toolchain_resolution
+
+# iOS and Apple cc changes and hacks
+## For Objective-C source files
+build --per_file_copt=.*\.mm\$@-std=c++20
+build --host_per_file_copt=.*\.mm\$@-std=c++20
+build --ios_minimum_os=12.0
+
+## TODO: (dchapp) this is currently needed otherwise -O0 and -DDEBUG=1 get passed to compilations of .mm/.m for production flavor builds
+build --experimental_objc_fastbuild_options=""
+## HACK inject this in the default toolchain which is only used on macos until we switch to bazel_toolchains
+build:macos --copt=-fvisibility=hidden
+
+# java configuration
+## Disable some java checks for now, djinni generates code that errors out
+build --javacopt=-XepDisableAllChecks
+build --java_runtime_version=11
+build --tool_java_runtime_version=17
+
+build --flag_alias=snap_flavor=@snap_platforms//flavors:snap_flavor
+build --snap_flavor=platform_development
+
+build --android_crosstool_top=@androidndk//:toolchain
+build --define=android_dexmerger_tool=d8_dexmerger
+build --define=android_incremental_dexing_tool=d8_dexbuilder
+build --define=android_standalone_dexing_tool=d8_compat_dx
+build --incremental_dexing
+
+# Disable 3rd party libs warnings
+build --per_file_copt=external/com_github_grpc_grpc/.*\$@-Wno-everything
+build --per_file_copt=external/snap_protobuf/.*\$@-Wno-everything
+build --per_file_copt=external/boringssl/.*\$@-Wno-everything
+build --per_file_copt=external/com_github_google_flatbuffers/.*\$@-Wno-everything
+
+# Enable persistent worker for Valdi compilation
+build --strategy=ValdiCompile=worker
+
+## Disable sandboxing for macs, both laptops and in CI; the performance hit is much too high.
+build:macos --spawn_strategy=local
+build:linux --sandbox_writable_path=/var/tmp
+
+# Disable disk cache to save disk space
+# https://docs.google.com/document/d/1N8W_M83n9jhMi7pgUhXuEuxypb3dmlHBu_CG_eXipXI/edit?usp=sharing
+build --disk_cache=""
+
+# common build configuration
+build --experimental_generate_json_trace_profile
+# enable grpc log
+build --remote_grpc_log=/tmp/snap_client_grpc.log
+build --experimental_reuse_sandbox_directories
+
+# Default JS engine
+build --flag_alias=valdi_js_engine=@valdi//bzl/valdi:js_engine
+build --valdi_js_engine=hermes
+
+# Valdi Open Source Flags
+build --define=open_source_build=true
+
+# Android SDK/NDK paths (using Flutter's Android SDK with NDK 26.3)
+build --action_env=ANDROID_HOME=/Users/universinformatique/Library/Android/sdk
+build --action_env=ANDROID_NDK_HOME=/Users/universinformatique/Library/Android/sdk/ndk/26.3.11579264
+</file>
+
+<file path="constants.ts">
+import { ProjectOptions } from './types';
+
+export const STACK_OPTIONS = [
+    // Web
+    'Next.js + Node/Express + Postgres',
+    'React/Vite + FastAPI + MongoDB',
+    'Vue + NestJS + MySQL',
+    'SvelteKit + Go + SQLite',
+    'Python/Flask + React',
+    'Ruby on Rails + Vue',
+    // Mobile
+    'Flutter (Dart) + Firebase',
+    'React Native + Node/Express + MongoDB',
+    'SwiftUI + Vapor',
+    'Kotlin Multiplatform + Ktor',
+    // Custom
+    'Custom'
+];
+
+export const BACKEND_OPTIONS = [
+    'Firebase',
+    'Go (Gin)',
+    'Java (Spring Boot)',
+    'Ktor (Kotlin)',
+    'Node.js (Express)',
+    'Node.js (NestJS)',
+    'PHP (Laravel)',
+    'Python (Django)',
+    'Python (FastAPI)',
+    'Python (Flask)',
+    'Ruby (Ruby on Rails)',
+    'Rust (Actix-web)',
+    'Vapor (Swift)',
+];
+
+export const FRONTEND_OPTIONS = [
+    'Angular',
+    'Flutter (Dart)',
+    'HTMX (with a backend)',
+    'Jetpack Compose (Kotlin)',
+    'Kotlin Multiplatform',
+    'Next.js',
+    'React (Vite)',
+    'React Native',
+    'SolidJS',
+    'SvelteKit',
+    'SwiftUI',
+    'Vanilla JS',
+    'Vue.js',
+];
+
+export const PATTERN_OPTIONS = ['Monolith', 'Microservice-lite (API Gateway + 2 services)', 'API-first'];
+export const AUTH_OPTIONS = ['None', 'Email/Password (JWT)', 'Google OAuth'];
+export const TESTING_OPTIONS = ['None', 'Jest', 'Vitest', 'Playwright (E2E)'];
+export const INFRA_OPTIONS = ['None', 'Dockerfile + docker-compose', 'Basic CI/CD (GitHub Actions)'];
+
+export const DEFAULT_PROJECT_OPTIONS: ProjectOptions = {
+  description: 'A SaaS-style dashboard where users can sign up, create projects, and track tasks within each project. Tasks should have a title, description, status, and priority.',
+  stack: STACK_OPTIONS[0],
+  pattern: PATTERN_OPTIONS[0],
+  auth: AUTH_OPTIONS[1],
+  testing: TESTING_OPTIONS[2],
+  infra: INFRA_OPTIONS[1],
+  backend: BACKEND_OPTIONS[0],
+  frontend: FRONTEND_OPTIONS[0],
+};
+</file>
+
+<file path="components/ErrorBoundary.tsx">
+import React, { Component, ReactNode, ErrorInfo } from 'react';
+
+interface Props {
+  children: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+}
+
+class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false
+    };
+  }
+
+  static getDerivedStateFromError(_: Error): State {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error in a component:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex h-full flex-col items-center justify-center bg-gray-50 dark:bg-gray-800 text-red-500 dark:text-red-400 p-4">
+          <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
+          <p className="text-center">An error occurred while rendering this file. Please try selecting another file or reloading the application.</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+</file>
+
+<file path="README.md">
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
+
+# Run and deploy your AI Studio app
+
+This contains everything you need to run your app locally with full authentication and persistent storage powered by PocketBase.
+
+View your app in AI Studio: https://ai.studio/apps/drive/1B_j3Rg4bgMVplt3Qhc7UDGB4XrmBeQf6
+
+## Features
+
+✨ **User Authentication** - Sign up and login with email/password powered by PocketBase  
+📁 **Project History** - All generated projects are automatically saved to the cloud  
+🔍 **Search Projects** - Quickly find your past projects  
+💾 **Auto-save** - Projects are saved automatically after generation  
+🎨 **Dark Mode** - Toggle between light and dark themes  
+🚀 **AI-Powered** - Generate complete project structures using Gemini 2.5 Pro  
+📧 **Email Support** - Password reset and email verification (configurable)
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- PocketBase (download from https://pocketbase.io/docs/)
+
+## Run Locally
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Setup PocketBase
+
+Download PocketBase from https://pocketbase.io/docs/ and extract it.
+
+Start PocketBase:
+```bash
+./pocketbase serve
+```
+
+Open http://127.0.0.1:8090/_/ and create an admin account.
+
+Setup the database collections (see [pocketbase_schema.md](./pocketbase_schema.md) for detailed instructions):
+- The `users` collection (auth) exists by default
+- Create a `projects` collection with the required fields
+
+### 3. Configure Environment Variables
+
+Copy `.env.local.example` to `.env.local`:
+```bash
+cp .env.local.example .env.local
+```
+
+Edit `.env.local` and set:
+- `VITE_GEMINI_API_KEY` - Your Gemini API key
+- `VITE_POCKETBASE_URL` - PocketBase URL (default: http://127.0.0.1:8090)
+
+### 4. Run the App
+
+```bash
+npm run dev
+```
+
+Visit http://localhost:3000
+
+## Architecture
+
+### Backend (PocketBase)
+- **Authentication**: Email/password with optional verification
+- **Database**: SQLite with real-time subscriptions
+- **Storage**: Projects stored as JSON in the database
+- **API**: RESTful API with built-in authorization rules
+
+### Frontend (React + Vite)
+- **Auth Context**: Manages authentication state with auto-refresh
+- **Services Layer**: Abstracts PocketBase API calls
+- **Real-time Updates**: Auth state changes are reactive
+
+## New in This Version
+
+- **PocketBase Integration**: Real backend replacing localStorage
+- **Cloud Storage**: All data stored in PocketBase database
+- **Secure Authentication**: Proper auth with password hashing and JWT tokens
+- **Email Support**: Password reset and verification capabilities
+- **API-driven**: Full REST API for users and projects
+- **Multi-device Sync**: Access your projects from any device
+
+## Production Deployment
+
+### PocketBase
+
+1. Deploy PocketBase to a server (can use Docker, VPS, or PocketBase Cloud)
+2. Configure SMTP for email functionality in PocketBase settings
+3. Enable HTTPS and set proper CORS settings
+4. Update `VITE_POCKETBASE_URL` to your production URL
+
+### Frontend
+
+1. Build the app:
+   ```bash
+   npm run build
+   ```
+2. Deploy the `dist` folder to any static hosting (Vercel, Netlify, etc.)
+3. Set environment variables in your hosting platform
+
+## Development Notes
+
+- PocketBase runs on port 8090 by default
+- The admin UI is at http://127.0.0.1:8090/_/
+- All API endpoints are at http://127.0.0.1:8090/api/
+- Check [pocketbase_schema.md](./pocketbase_schema.md) for database schema details
+
+## Troubleshooting
+
+**Can't connect to PocketBase:**
+- Ensure PocketBase is running (`./pocketbase serve`)
+- Check that `VITE_POCKETBASE_URL` is correct
+- Verify no firewall is blocking port 8090
+
+**Authentication errors:**
+- Clear browser storage and try again
+- Check PocketBase logs for errors
+- Verify the `users` collection is properly configured
+
+**Projects not saving:**
+- Ensure you're logged in
+- Check the `projects` collection exists with proper fields
+- Verify API rules allow authenticated users to create/update
+
+## License
+
+MIT
+</file>
+
+<file path="types.ts">
+export interface ProjectOptions {
+  description: string;
+  stack: string;
+  pattern: string;
+  auth: string;
+  testing: string;
+  infra: string;
+  backend?: string;
+  frontend?: string;
+}
+
+export type File = {
+  type: 'file';
+  name: string;
+  content: string;
+};
+
+export type Folder = {
+  type: 'folder';
+  name: string;
+  children: FileNode[];
+};
+
+export type FileNode = File | Folder;
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatar?: string;
+  created?: string;
+  updated?: string;
+}
+
+export interface SavedProject {
+  id: string;
+  user: string;
+  name: string;
+  description?: string;
+  options: ProjectOptions;
+  files: FileNode[];
+  created?: string;
+  updated?: string;
+}
+</file>
+
+<file path="index.html">
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt-to-Project Starter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      mark.search-highlight {
+        background-color: #fef08a; /* yellow-200 */
+        color: #713f12; /* amber-900 */
+        padding: 0 2px;
+        border-radius: 2px;
+      }
+      .dark mark.search-highlight {
+        background-color: #facc15; /* yellow-400 */
+        color: #111827; /* gray-900 */
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .animate-slide-up {
+        animation: slideUp 0.3s ease-out;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable class-based dark mode
+        theme: {
+          extend: {
+            colors: {
+              gray: {
+                50: '#f9fafb',
+                100: '#f3f4f6',
+                200: '#e5e7eb',
+                300: '#d1d5db',
+                400: '#9ca3af',
+                500: '#6b7280',
+                600: '#4b5563',
+                700: '#374151',
+                800: '#1f2937',
+                900: '#111827',
+                950: '#030712',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body class="h-full antialiased">
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="components/PromptForm.tsx">
+import React, { useState, useEffect, useCallback } from 'react';
+import { ProjectOptions } from '../types';
+import { STACK_OPTIONS, PATTERN_OPTIONS, AUTH_OPTIONS, TESTING_OPTIONS, INFRA_OPTIONS, DEFAULT_PROJECT_OPTIONS, BACKEND_OPTIONS, FRONTEND_OPTIONS } from '../constants';
+import { SparklesIcon, ChevronDownIcon } from './icons/Icons';
+
+interface PromptFormProps {
+  onGenerate: (options: ProjectOptions) => void;
+  isLoading: boolean;
+}
+
+const FormSelect: React.FC<{label: string, name: string, value: string | undefined, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[]}> = ({ label, name, value, onChange, options }) => (
+    <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+        <div className="relative mt-1">
+            <select
+                name={name}
+                value={value}
+                onChange={onChange}
+                className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none text-gray-900 dark:text-gray-200"
+            >
+                {options.map(option => <option key={option}>{option}</option>)}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+            </div>
+        </div>
+    </div>
+);
+
+const LOCAL_STORAGE_KEY = 'prompt-to-project-options';
+
+export const PromptForm: React.FC<PromptFormProps> = ({ onGenerate, isLoading }) => {
+  const [options, setOptions] = useState<ProjectOptions>(() => {
+    try {
+      const savedOptions = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedOptions) {
+        const parsed = JSON.parse(savedOptions);
+        // Merge with defaults to handle cases where new options are added
+        // and not present in the user's saved data.
+        return { ...DEFAULT_PROJECT_OPTIONS, ...parsed };
+      }
+    } catch (error) {
+      console.error('Could not load project options from localStorage', error);
+    }
+    return DEFAULT_PROJECT_OPTIONS;
+  });
+
+  useEffect(() => {
+    try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(options));
+    } catch (error) {
+        console.error('Could not save project options to localStorage', error);
+    }
+  }, [options]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.currentTarget;
+    setOptions(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onGenerate(options);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50/50 dark:bg-gray-950/50 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Project Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={5}
+          className="block w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-gray-900 dark:text-white p-3"
+          value={options.description}
+          onChange={handleChange}
+          placeholder="Describe your project idea here..."
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="md:col-span-2">
+            <FormSelect label="Tech Stack" name="stack" value={options.stack} onChange={handleChange} options={STACK_OPTIONS} />
+        </div>
+        
+        {options.stack === 'Custom' && (
+            <>
+                 <FormSelect label="Backend Framework" name="backend" value={options.backend} onChange={handleChange} options={BACKEND_OPTIONS} />
+                 <FormSelect label="Frontend Framework" name="frontend" value={options.frontend} onChange={handleChange} options={FRONTEND_OPTIONS} />
+            </>
+        )}
+
+        <FormSelect label="Architecture Pattern" name="pattern" value={options.pattern} onChange={handleChange} options={PATTERN_OPTIONS} />
+        <FormSelect label="Authentication" name="auth" value={options.auth} onChange={handleChange} options={AUTH_OPTIONS} />
+        <FormSelect label="Testing Framework" name="testing" value={options.testing} onChange={handleChange} options={TESTING_OPTIONS} />
+        <FormSelect label="Infrastructure" name="infra" value={options.infra} onChange={handleChange} options={INFRA_OPTIONS} />
+      </div>
+
+      <div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-500/50 dark:disabled:bg-indigo-900/50 disabled:cursor-not-allowed transition-colors"
+        >
+          {isLoading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Generating...
+            </>
+          ) : (
+            <>
+              <SparklesIcon className="h-5 w-5 mr-2" />
+              Generate Project
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+};
+</file>
+
+<file path="components/icons/Icons.tsx">
+import React from 'react';
+
+export const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+  </svg>
+);
+
+export const CodeBracketSquareIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+  </svg>
+);
+
+export const ChevronDownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+    </svg>
+);
+
+export const ChevronRightIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+    </svg>
+);
+
+export const FolderIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+  </svg>
+);
+
+export const FileIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+  </svg>
+);
+
+export const ClipboardIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a2.25 2.25 0 0 1-2.25 2.25h-1.5a2.25 2.25 0 0 1-2.25-2.25v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+  </svg>
+);
+
+export const CheckIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+    </svg>
+);
+
+export const ArrowDownTrayIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+  </svg>
+);
+
+export const SunIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+    </svg>
+);
+
+export const MoonIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25c0 5.385 4.365 9.75 9.75 9.75 2.572 0 4.92-.99 6.697-2.647Z" />
+    </svg>
+);
+
+export const TagIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6Z" />
+    </svg>
+);
+
+export const DocumentTextIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15h6m-6 3h4" />
+  </svg>
+);
+
+
+// File Type Icons
+const FileTypeIconWrapper: React.FC<{ children: React.ReactNode } & React.SVGProps<SVGSVGElement>> = ({ children, ...props }) => (
+  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    {children}
+  </svg>
+);
+
+export const CssIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} strokeWidth={1.5} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+        <path fill="#1572B6" d="M2.6 2.2h18.8L19.8 19.7 12 21.8l-7.8-2.1L2.6 2.2z"/>
+        <path fill="#33A9DC" d="M12 4.2v15.9l6.5-1.8L18.4 4.2H12z"/>
+        <path fill="#EBEBEB" d="M12 9.2H8.3l-.2-2.5h4.1V4.2H5.4l.6 6.5h6V9.2zm-.1 3.2c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1zm-1.8-1c0 .5.4.8.8.8s.8-.3.8-.8-.4-.8-.8-.8-.8.3-.8.8z"/>
+        <path fill="#fff" d="M12 9.2v2.5h2.1l-.3 3.4-1.8.5v2.5l4.4-1.2.5-5.7H12V9.2zm2.1 3.2c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.5 1-1 1zm-1.8-1c0 .5.4.8.8.8s.8-.3.8-.8-.4-.8-.8-.8-.8.3-.8.8z"/>
+    </FileTypeIconWrapper>
+);
+
+export const FirebaseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 64 64">
+        <path d="M9.3,53.4,32,10.6,54.7,53.4,43.2,42.4Z" fill="#f57c00" />
+        <path d="M9.3,53.4,22,29.1,32,46Z" fill="#ffa000" />
+        <path d="M9.3,53.4,32,10.6,22,29.1Z" fill="#ffca28" />
+    </FileTypeIconWrapper>
+);
+
+export const FlutterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+    <path d="M13.6 1.6L4.5 10.7l4.2 4.2L19.4 4.2 13.6 1.6zm.5 11.2l-4.2 4.2h8.5l-4.3-4.2z" fill="#40D0FD" />
+    <path d="M9.4 10.7L4.5 15.6l4.9 4.8h8.5l-4.2-4.2-4.3-4.2z" fill="#03599C" />
+  </FileTypeIconWrapper>
+);
+
+export const GitIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+        <path fill="#F05033" d="m22.5 10.7-5.9-5.9c-.4-.4-.9-.6-1.4-.6H4.2c-.8 0-1.5.7-1.5 1.5v13.3c0 .8.7 1.5 1.5 1.5h15.7c.8 0 1.5-.7 1.5-1.5V12c0-.5-.2-1-.6-1.3zM18 19.4H6V4.6h8.6l4.2 4.2v10.6zm-4.7-2.1c.4.4.4 1 0 1.4s-1 .4-1.4 0l-1.8-1.8-1.8 1.8c-.4.4-1 .4-1.4 0-.4-.4-.4-1 0-1.4l1.8-1.8-1.8-1.8c-.4-.4-.4-1 0-1.4s1-.4 1.4 0l1.8 1.8 1.8-1.8c.4-.4 1-.4 1.4 0s.4 1 0 1.4l-1.8 1.8 1.8 1.8zM14.5 12H9.3c-.3 0-.5-.2-.5-.5s.2-.5.5-.5h5.3c.3 0 .5.2.5.5s-.3.5-.6.5z"/>
+    </FileTypeIconWrapper>
+);
+
+export const HtmlIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} strokeWidth={1.5} stroke="currentColor" fill="none" viewBox="0 0 24 24">
+     <path fill="#E34F26" d="M2.6 2.2h18.8L19.8 19.7 12 21.8l-7.8-2.1L2.6 2.2z"/>
+     <path fill="#F16529" d="M12 4.2v15.9l6.5-1.8L18.4 4.2H12z"/>
+     <path fill="#EBEBEB" d="M12 9.2H8.3l-.2-2.5h4.1V4.2H5.4l.6 6.5h6V9.2zm0 5.1v-2.5H7.8l.4 4.2 3.8 1v.1h-.1l-.1-.1-.1 0z"/>
+     <path fill="#fff" d="M12 9.2v2.5h3.5l-.3 3.4-3.2.9v2.6l5.7-1.5.8-8.9H12v-2.5h.1l-.1 2.5z"/>
+  </FileTypeIconWrapper>
+);
+
+export const JsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props}>
+    <path fill="#F7DF1E" d="M0 0h32v32H0z" />
+    <path fill="#000" d="M21.2 24.3c.7 1.1 1.8 1.8 3.2 1.8 1.3 0 2.2-.6 2.2-1.5 0-.9-.6-1.3-1.8-1.9l-1-.4c-1.8-.8-3-1.8-3-4.2 0-2.3 1.8-4 4.5-4 2.1 0 3.6.8 4.6 2.6l-2.4 1.4c-.4-.9-1-1.3-1.9-1.3-1 0-1.5.5-1.5 1.3 0 .8.5 1.2 1.6 1.7l1 .4c2.2.9 3.4 2 3.4 4.4 0 2.7-2 4.4-5 4.4-2.8 0-4.7-1.3-5.7-3.1l2.2-1.4zM10.3 22.4c.5 1.4 1.4 2.1 2.8 2.1 1.3 0 2.1-.6 2.1-2.4V14.5h3.2v8.2c0 3.9-2.2 5.7-5.5 5.7-3.1 0-4.9-1.6-5.8-3.7l2.2-1.4z" />
+  </FileTypeIconWrapper>
+);
+
+export const JsonIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 24 24" fill="currentColor">
+        <path fillOpacity=".3" d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+        <path d="M11.4 15.8c-.8 0-1.4.3-2 .8l-1.3-1.3c.9-.8 2-1.3 3.3-1.3 2.3 0 3.5 1.4 3.5 3.3s-1.2 3.3-3.5 3.3c-1.3 0-2.4-.5-3.3-1.3l1.3-1.3c.5.5 1.1.8 1.9.8.9 0 1.5-.6 1.5-1.5s-.6-1.5-1.4-1.5zm1.2-5.4c.8 0 1.4-.3 1.9-.8l1.3 1.3c-.9.8-2 1.3-3.2 1.3-2.3 0-3.5-1.4-3.5-3.3S9.1 6.3 11.4 6.3c1.3 0 2.4.5 3.3 1.3l-1.3 1.3c-.5-.5-1.1-.8-2-.8-.9 0-1.5.6-1.5 1.5s.6 1.5 1.5 1.5z"/>
+    </FileTypeIconWrapper>
+);
+
+export const KotlinIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+    <path fill="#7F52FF" d="M2 2h20l-10 10L2 2z"/>
+    <path fill="#7F52FF" d="M2 2v20l10-10L2 2z"/>
+    <path fill="#7F52FF" d="M22 22L2 2v20l20-20z"/>
+  </FileTypeIconWrapper>
+);
+
+export const MarkdownIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.6 6.4h-3.2V4.2h3.2v2.2zM21.7 9.8h-4.3v10h-3.2v-10H10v-3.3l5.9-5.9h5.8v9.2zM10 2.2H3.3l5.9 5.9V12h3.2V2.2z"/>
+    </FileTypeIconWrapper>
+);
+
+export const NpmIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <FileTypeIconWrapper {...props} viewBox="0 0 16 16">
+        <path fill="#CB3837" d="M0 0h16v16H0z"/>
+        <path fill="#fff" d="M2 5h12v5h-4v2H6V10H2V5zm1 1v3h2V6H3zm3 0v4h4V6H6zm5 0v3h2V6h-2z"/>
+    </FileTypeIconWrapper>
+);
+
+export const SwiftIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24">
+    <path fill="#F05138" d="M17.3 3.4C13 .1 6.8 4 6.8 4s6.9-1.9 11.2 2.4c4.4 4.4 2.4 11.2 2.4 11.2s1.9-6.9-3.1-11.2z"/>
+    <path fill="#FFFFFF" d="M16.7 4c-4-4-9.8 0-9.8 0s6-2.3 10 1.7c4 4 1.7 10 1.7 10s2.3-6-2-10zM12.3 12.4L18.4 6c-.4-.1-.8-.1-1.2-.1-1.3 0-2.5.4-3.6 1.1-.9.6-1.7 1.4-2.3 2.3l1 3.1z"/>
+  </FileTypeIconWrapper>
+);
+
+export const TailwindIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24" fill="none">
+    <path d="M12.001 4.529c1.316 0 2.42.415 3.33 1.245a4.525 4.525 0 011.252 3.323c0 1.316-.417 2.42-1.252 3.323-1.015 1.015-2.223 1.523-3.623 1.523-1.4 0-2.608-.508-3.623-1.523a4.525 4.525 0 01-1.252-3.323c0-1.316.417-2.42 1.252-3.323.91-.83 2.014-1.245 3.33-1.245zM19.001 12.029c1.316 0 2.42.415 3.33 1.245a4.525 4.525 0 011.252 3.323c0 1.316-.417 2.42-1.252 3.323-1.015 1.015-2.223 1.523-3.623 1.523-1.4 0-2.608-.508-3.623-1.523a4.525 4.525 0 01-1.252-3.323c0-1.316.417-2.42 1.252-3.323.91-.83 2.014-1.245 3.33-1.245z" fill="#38bdf8" />
+  </FileTypeIconWrapper>
+);
+
+export const TsIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props}>
+    <path fill="#007ACC" d="M0 0h32v32H0z" />
+    <path fill="#fff" d="M19.4 14.8h-4.3v11.6h-3.2V14.8H7.6v-2.8h11.8v2.8zM24.4 22.8c.6 1.1 1.6 1.8 3 1.8 1.3 0 2.1-.6 2.1-1.5 0-.9-.6-1.3-1.7-1.8l-1-.4c-1.7-.7-2.9-1.7-2.9-4.1 0-2.3 1.7-4 4.4-4 2.1 0 3.5.8 4.5 2.6l-2.3 1.4c-.4-.9-1-1.3-1.8-1.3s-1.5.5-1.5 1.3c0 .8.5 1.2 1.6 1.7l1 .4c2.1.9 3.3 2 3.3 4.4 0 2.7-2 4.4-4.9 4.4-2.7 0-4.6-1.3-5.5-3.1l2.1-1.4z" />
+  </FileTypeIconWrapper>
+);
+
+export const ViteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <FileTypeIconWrapper {...props} viewBox="0 0 24 24" fill="none">
+    <path d="M17.48.11a1.2 1.2 0 00-1.137.76L12 11.24l-4.32-10.4a1.2 1.2 0 00-2.26 0L.92 20.91a1.2 1.2 0 001.13 1.64h.01c.52 0 1-.34 1.16-.83l2.8-6.68h9.84l2.82 6.68a1.2 1.2 0 001.16.83h.01c.7 0 1.25-.63 1.13-1.64L17.48.1z" fill="url(#vite-grad)" />
+    <path d="M23.08 10.15a1.2 1.2 0 00-1.13.76L18.4 19.95h-5.23a1.2 1.2 0 100 2.4h6.36c.52 0 1-.34 1.16-.83l3.5-8.22a1.2 1.2 0 00-1.1-1.66z" fill="#FFC107" />
+    <defs>
+      <linearGradient id="vite-grad" x1="12.1" x2="12.1" y1=".1" y2="22.5" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#41D1FF" />
+        <stop offset="1" stopColor="#BD34FE" />
+      </linearGradient>
+    </defs>
+  </FileTypeIconWrapper>
+);
+</file>
+
+<file path="App.tsx">
+import React, { useState, useCallback, useEffect } from 'react';
+import { PromptForm } from './components/PromptForm';
+import { ResultsDisplay } from './components/ResultsDisplay';
+import { AuthForm } from './components/AuthForm';
+import { ProjectHistory } from './components/ProjectHistory';
+import { SaveProjectDialog } from './components/SaveProjectDialog';
+import { Toast } from './components/Toast';
+import { CodeBracketSquareIcon, SunIcon, MoonIcon } from './components/icons/Icons';
+import { generateProjectStructure } from './services/geminiService';
+import { projectHistoryService } from './services/projectHistoryService';
+import { useAuth } from './contexts/AuthContext';
+import { FileNode, ProjectOptions, SavedProject } from './types';
+
+const SkeletonLoader = () => (
+    <div className="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex animate-pulse">
+        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-100 dark:bg-gray-900 p-4 space-y-4">
+            {[...Array(3)].map((_, i) => (
+                <div key={i}>
+                    <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="pl-5 mt-2 space-y-2">
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                    </div>
+                </div>
+            ))}
+             <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mt-4"></div>
+             <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mt-4"></div>
+        </div>
+        <div className="w-2/3 flex-grow flex flex-col bg-gray-200 dark:bg-gray-800">
+            <div className="p-3 border-b border-gray-300 dark:border-gray-700">
+                <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-1/4"></div>
+            </div>
+            <div className="p-4 space-y-2 flex-grow">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-5/6"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+            </div>
+        </div>
+    </div>
+);
+
+const GenerationProgress: React.FC<{ details: ProjectOptions }> = ({ details }) => {
+    const stackDisplay = details.stack === 'Custom' 
+        ? `${details.frontend} + ${details.backend}`
+        : details.stack;
+
+    return (
+        <>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-black dark:text-white">Generating Project...</h3>
+            </div>
+            <div className="relative">
+                <SkeletonLoader />
+                <div className="absolute inset-0 bg-gray-200/80 dark:bg-gray-800/80 flex items-center justify-center">
+                    <div className="text-center p-8 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-300 dark:border-gray-700 max-w-md mx-auto">
+                        <div className="flex justify-center items-center mb-4">
+                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
+                        </div>
+                        <h4 className="text-xl font-semibold text-black dark:text-white mb-2">Crafting Your Codebase</h4>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">Gemini is building your project. This might take a moment.</p>
+                        <div className="text-left text-sm space-y-2 bg-gray-100/50 dark:bg-gray-800/50 p-4 rounded-md border border-gray-300 dark:border-gray-700">
+                            <p><strong className="font-medium text-gray-700 dark:text-gray-300 w-28 inline-block">Stack:</strong> <span className="text-indigo-600 dark:text-indigo-300">{stackDisplay}</span></p>
+                            <p><strong className="font-medium text-gray-700 dark:text-gray-300 w-28 inline-block">Pattern:</strong> <span className="text-indigo-600 dark:text-indigo-300">{details.pattern}</span></p>
+                            <p><strong className="font-medium text-gray-700 dark:text-gray-300 w-28 inline-block">Auth:</strong> <span className="text-indigo-600 dark:text-indigo-300">{details.auth}</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+type Theme = 'light' | 'dark';
+
+const AppContent: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [generatedFiles, setGeneratedFiles] = useState<FileNode[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [projectOptions, setProjectOptions] = useState<ProjectOptions | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const savedTheme = window.localStorage.getItem('theme') as Theme;
+      if (savedTheme) return savedTheme;
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const handleThemeSwitch = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleGenerateProject = useCallback(async (options: ProjectOptions) => {
+    setIsLoading(true);
+    setError(null);
+    setGeneratedFiles(null);
+    setProjectOptions(options);
+    setCurrentProjectId(null);
+    try {
+      const files = await generateProjectStructure(options);
+      setGeneratedFiles(files);
+      
+      if (user && files && files.length > 0) {
+        const projectName = options.description.slice(0, 50).trim() || 'Untitled Project';
+        const savedProject = await projectHistoryService.saveProject(
+          user.id,
+          projectName,
+          options,
+          files
+        );
+        setCurrentProjectId(savedProject.id);
+        setToast({ message: 'Project saved successfully!', type: 'success' });
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred. Please check the console.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const handleSaveProject = useCallback(async (name: string) => {
+    if (!user || !generatedFiles || !projectOptions) return;
+    
+    try {
+      if (currentProjectId) {
+        await projectHistoryService.updateProject(currentProjectId, {
+          name,
+          files: generatedFiles,
+          options: projectOptions,
+        });
+        setToast({ message: 'Project updated successfully!', type: 'success' });
+      } else {
+        const savedProject = await projectHistoryService.saveProject(
+          user.id,
+          name,
+          projectOptions,
+          generatedFiles
+        );
+        setCurrentProjectId(savedProject.id);
+        setToast({ message: 'Project saved successfully!', type: 'success' });
+      }
+      
+      setShowSaveDialog(false);
+    } catch (err) {
+      console.error(err);
+      setToast({ 
+        message: err instanceof Error ? err.message : 'Failed to save project', 
+        type: 'error' 
+      });
+    }
+  }, [user, generatedFiles, projectOptions, currentProjectId]);
+
+  const handleLoadProject = useCallback((project: SavedProject) => {
+    setGeneratedFiles(project.files);
+    setProjectOptions(project.options);
+    setCurrentProjectId(project.id);
+    setShowHistory(false);
+    setError(null);
+    setToast({ message: 'Project loaded successfully!', type: 'info' });
+  }, []);
+
+  if (!user) {
+    return <AuthForm />;
+  }
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 flex flex-col transition-colors duration-300">
+      <header className="bg-white/70 dark:bg-gray-950/70 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-200 dark:border-gray-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <CodeBracketSquareIcon className="h-8 w-8 text-indigo-500" />
+              <h1 className="text-xl font-bold tracking-tight text-black dark:text-white">
+                Prompt-to-Project Starter
+              </h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
+                {user.name}
+              </span>
+              <button
+                onClick={() => setShowHistory(true)}
+                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                aria-label="Project history"
+                title="Project History"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              {generatedFiles && (
+                <button
+                  onClick={() => setShowSaveDialog(true)}
+                  className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                  aria-label="Save project"
+                  title="Save Project"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                </button>
+              )}
+              <button
+                onClick={handleThemeSwitch}
+                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
+              </button>
+              <button
+                onClick={logout}
+                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-extrabold tracking-tight text-black dark:text-white sm:text-4xl">
+              Turn Your Idea Into Code
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+              Describe your application, select your tech stack, and let AI generate a complete starter project for you.
+            </p>
+          </div>
+          
+          <PromptForm onGenerate={handleGenerateProject} isLoading={isLoading} />
+
+          {error && (
+            <div className="mt-10 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg" role="alert">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
+          <div className="mt-12">
+            {isLoading && projectOptions && <GenerationProgress details={projectOptions} />}
+            {generatedFiles && !isLoading && <ResultsDisplay files={generatedFiles} />}
+          </div>
+        </div>
+      </main>
+      
+      <footer className="bg-white/70 dark:bg-gray-950/70 py-4 border-t border-gray-200 dark:border-gray-800">
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+          Powered by Gemini 2.5 Pro
+        </div>
+      </footer>
+
+      {showHistory && (
+        <ProjectHistory
+          onLoadProject={handleLoadProject}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
+
+      {showSaveDialog && (
+        <SaveProjectDialog
+          onSave={handleSaveProject}
+          onCancel={() => setShowSaveDialog(false)}
+          defaultName={projectOptions?.description.slice(0, 50) || ''}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return <AppContent />;
+};
+
+export default App;
+</file>
+
+<file path="components/ResultsDisplay.tsx">
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { FileNode, File as FileType } from '../types';
+import { FolderIcon, FileIcon, ClipboardIcon, CheckIcon, ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon, JsIcon, TsIcon, HtmlIcon, CssIcon, JsonIcon, MarkdownIcon, NpmIcon, GitIcon, TailwindIcon, ViteIcon, FlutterIcon, SwiftIcon, KotlinIcon, FirebaseIcon, TagIcon, DocumentTextIcon } from './icons/Icons';
+import ErrorBoundary from './ErrorBoundary';
+
+declare global {
+  interface Window {
+    JSZip: any;
+    hljs: any;
+  }
+}
+
+const getLanguageFromFileName = (fileName: string): string => {
+  if (fileName.toLowerCase() === 'dockerfile') return 'dockerfile';
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'js':
+    case 'jsx':
+      return 'javascript';
+    case 'ts':
+    case 'tsx':
+      return 'typescript';
+    case 'py':
+      return 'python';
+    case 'dart':
+      return 'dart';
+    case 'swift':
+      return 'swift';
+    case 'kt':
+    case 'kts':
+      return 'kotlin';
+    case 'html':
+      return 'xml'; // highlight.js uses 'xml' for html
+    case 'css':
+      return 'css';
+    case 'json':
+      return 'json';
+    case 'md':
+      return 'markdown';
+    case 'sh':
+      return 'bash';
+    case 'yml':
+    case 'yaml':
+      return 'yaml';
+    default:
+      return 'plaintext';
+  }
+};
+
+const getFileIconComponent = (fileName: string): React.FC<React.SVGProps<SVGSVGElement>> => {
+    if (fileName === 'package.json') return NpmIcon;
+    if (fileName === '.gitignore') return GitIcon;
+    if (fileName.includes('tailwind.config')) return TailwindIcon;
+    if (fileName.includes('vite.config')) return ViteIcon;
+    if (fileName === 'firebase.json' || fileName === '.firebaserc') return FirebaseIcon;
+    if (fileName === 'pubspec.yaml') return FlutterIcon;
+    
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+        case 'js':
+        case 'jsx':
+            return JsIcon;
+        case 'ts':
+        case 'tsx':
+            return TsIcon;
+        case 'dart':
+            return FlutterIcon;
+        case 'swift':
+            return SwiftIcon;
+        case 'kt':
+        case 'kts':
+            return KotlinIcon;
+        case 'html':
+            return HtmlIcon;
+        case 'css':
+        case 'scss':
+        case 'sass':
+            return CssIcon;
+        case 'json':
+            return JsonIcon;
+        case 'md':
+            return MarkdownIcon;
+        default:
+            return FileIcon;
+    }
+};
+
+const useFileTreeState = () => {
+    const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+    const toggleFolder = useCallback((path: string) => {
+        setExpandedFolders(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(path)) {
+                newSet.delete(path);
+            } else {
+                newSet.add(path);
+            }
+            return newSet;
+        });
+    }, []);
+
+    return { expandedFolders, toggleFolder, setExpandedFolders };
+};
+
+const TreeNode: React.FC<{
+    node: FileNode;
+    level: number;
+    currentPath: string;
+    onSelectFile: (file: FileType) => void;
+    selectedFile: FileType | null;
+    expandedFolders: Set<string>;
+    toggleFolder: (path: string) => void;
+}> = ({ node, level, currentPath, onSelectFile, selectedFile, expandedFolders, toggleFolder }) => {
+    const isExpanded = expandedFolders.has(currentPath);
+
+    if (node.type === 'folder') {
+        return (
+            <li>
+                <button
+                    onClick={() => toggleFolder(currentPath)}
+                    className="w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-200 dark:focus:bg-gray-700/50"
+                    style={{ paddingLeft: `${level * 1.25}rem` }}
+                    aria-expanded={isExpanded}
+                    role="treeitem"
+                >
+                    {isExpanded ? <ChevronDownIcon className="h-4 w-4 flex-shrink-0" /> : <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />}
+                    <FolderIcon className="h-5 w-5 flex-shrink-0 text-sky-500 dark:text-sky-400" />
+                    <span>{node.name}</span>
+                </button>
+                {isExpanded && (
+                    <ul role="group">
+                        {node.children.sort((a,b) => {
+                            if (a.type === 'folder' && b.type === 'file') return -1;
+                            if (a.type === 'file' && b.type === 'folder') return 1;
+                            return a.name.localeCompare(b.name);
+                        }).map(childNode => (
+                            <TreeNode
+                                key={childNode.name}
+                                node={childNode}
+                                level={level + 1}
+                                currentPath={`${currentPath}/${childNode.name}`}
+                                onSelectFile={onSelectFile}
+                                selectedFile={selectedFile}
+                                expandedFolders={expandedFolders}
+                                toggleFolder={toggleFolder}
+                            />
+                        ))}
+                    </ul>
+                )}
+            </li>
+        );
+    }
+
+    const FileIconComponent = getFileIconComponent(node.name);
+    const isSelected = selectedFile?.name === node.name && selectedFile?.content === node.content;
+    return (
+        <li style={{ paddingLeft: `${(level * 1.25)}rem` }}>
+             <button 
+                onClick={() => onSelectFile(node)} 
+                className={`w-full text-left flex items-center space-x-2 p-1 rounded-md transition-colors ${isSelected ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'} focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-gray-200 dark:focus:bg-gray-700/50`}
+                role="treeitem"
+             >
+                <FileIconComponent className="h-5 w-5 flex-shrink-0 ml-4" />
+                <span>{node.name}</span>
+            </button>
+        </li>
+    );
+};
+
+const FileTreeView: React.FC<{
+    nodes: FileNode[];
+    onSelectFile: (file: FileType) => void;
+    selectedFile: FileType | null;
+    expandedFolders: Set<string>;
+    toggleFolder: (path: string) => void;
+}> = ({ nodes, onSelectFile, selectedFile, expandedFolders, toggleFolder }) => {
+    const treeRef = useRef<HTMLUListElement>(null);
+
+    // Fix: Correctly type focusable nodes and handle active element to prevent TS errors.
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLUListElement>) => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') {
+            return;
+        }
+        e.preventDefault();
+
+        const focusableNodes = Array.from(
+            treeRef.current?.querySelectorAll('[role="treeitem"]') ?? []
+        ) as HTMLElement[];
+
+        const activeElement = document.activeElement;
+        const currentIndex = focusableNodes.findIndex(node => node === activeElement);
+
+        if (currentIndex === -1 && focusableNodes.length > 0) {
+            focusableNodes[0].focus();
+            return;
+        }
+
+        let nextIndex = -1;
+        if (e.key === 'ArrowDown') {
+            nextIndex = currentIndex + 1;
+        } else if (e.key === 'ArrowUp') {
+            nextIndex = currentIndex - 1;
+        }
+
+        if (nextIndex >= 0 && nextIndex < focusableNodes.length) {
+            focusableNodes[nextIndex].focus();
+        }
+    }, []);
+
+    return (
+        <ul className="space-y-1" role="tree" ref={treeRef} onKeyDown={handleKeyDown}>
+            {nodes.length === 0 && (
+                <li className="p-2 text-sm text-gray-500 dark:text-gray-400 text-center">No matching files found.</li>
+            )}
+            {nodes.sort((a,b) => {
+                if (a.type === 'folder' && b.type === 'file') return -1;
+                if (a.type === 'file' && b.type === 'folder') return 1;
+                return a.name.localeCompare(b.name);
+            }).map(node => (
+                <TreeNode
+                    key={node.name}
+                    node={node}
+                    level={0}
+                    currentPath={node.name}
+                    onSelectFile={onSelectFile}
+                    selectedFile={selectedFile}
+                    expandedFolders={expandedFolders}
+                    toggleFolder={toggleFolder}
+                />
+            ))}
+        </ul>
+    );
+};
+
+
+const CodeViewer: React.FC<{ file: FileType | null; searchQuery: string }> = ({ file, searchQuery }) => {
+    const [copied, setCopied] = useState(false);
+    const codeRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        const codeElement = codeRef.current;
+        if (!codeElement || !window.hljs || !file) {
+            return;
+        }
+
+        // Fix: Explicitly reset className to remove the 'hljs' class added by the library.
+        // This prevents a bug where highlight.js would skip re-highlighting the content
+        // on subsequent file views, leading to an inconsistent state and a crash.
+        codeElement.className = `language-${getLanguageFromFileName(file.name)}`;
+        
+        // 1. Set content and apply syntax highlighting. This creates a clean slate.
+        codeElement.textContent = file.content;
+        window.hljs.highlightElement(codeElement);
+        
+        // 2. Apply search term highlighting if a query exists.
+        if (!searchQuery.trim()) {
+            return; // No search query, so we're done.
+        }
+
+        const regex = new RegExp(searchQuery.trim(), 'gi');
+        
+        // Walk through all text nodes within the now-highlighted code.
+        const walker = document.createTreeWalker(codeElement, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        while (walker.nextNode()) {
+            textNodes.push(walker.currentNode as Text);
+        }
+
+        textNodes.forEach(node => {
+            if (!node.textContent || !node.parentNode) return;
+            
+            // Skip nodes already inside a mark tag to prevent nesting issues.
+            if (node.parentNode.nodeName === 'MARK') return;
+
+            const matches = [...node.textContent.matchAll(regex)];
+            if (matches.length > 0) {
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+
+                matches.forEach(match => {
+                    const index = match.index ?? 0;
+                    const matchedText = match[0];
+                    
+                    // Add text before the match
+                    if (index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(node.textContent!.substring(lastIndex, index)));
+                    }
+
+                    // Add the highlighted match
+                    const mark = document.createElement('mark');
+                    mark.className = 'search-highlight';
+                    mark.textContent = matchedText;
+                    fragment.appendChild(mark);
+
+                    lastIndex = index + matchedText.length;
+                });
+
+                // Add any remaining text after the last match
+                if (lastIndex < node.textContent.length) {
+                    fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex)));
+                }
+                
+                node.parentNode.replaceChild(fragment, node);
+            }
+        });
+    }, [file, searchQuery]);
+    
+    const handleCopy = () => {
+        if (file) {
+            navigator.clipboard.writeText(file.content);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
+    
+    if (!file) {
+        return (
+            <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400">
+                <p>Select a file to view its content</p>
+            </div>
+        );
+    }
+
+    const language = getLanguageFromFileName(file.name);
+
+    return (
+        <div className="flex flex-col h-full bg-white dark:bg-gray-950 rounded-lg">
+            <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+                <span className="font-mono text-sm text-gray-700 dark:text-gray-300">{file.name}</span>
+                <button
+                    onClick={handleCopy}
+                    className="flex items-center space-x-1.5 px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors text-gray-700 dark:text-gray-300"
+                >
+                    {copied ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
+                    <span>{copied ? 'Copied!' : 'Copy'}</span>
+                </button>
+            </div>
+            <div className="flex-grow overflow-auto p-4 bg-gray-900 text-gray-200">
+                 <pre className="text-sm bg-transparent p-0 m-0"><code ref={codeRef} className={`language-${language}`}>{file.content}</code></pre>
+            </div>
+        </div>
+    );
+};
+
+interface ResultsDisplayProps {
+  files: FileNode[];
+}
+
+const filterNodes = (nodes: FileNode[], query: string, searchInName: boolean, searchInContent: boolean): FileNode[] => {
+    if (!query.trim() || (!searchInName && !searchInContent)) {
+        return nodes;
+    }
+    const lowerCaseQuery = query.toLowerCase();
+
+    const filter = (node: FileNode): FileNode | null => {
+        if (node.type === 'file') {
+            const nameMatches = searchInName && node.name.toLowerCase().includes(lowerCaseQuery);
+            const contentMatches = searchInContent && node.content.toLowerCase().includes(lowerCaseQuery);
+            return (nameMatches || contentMatches) ? node : null;
+        }
+
+        if (node.type === 'folder') {
+            if (searchInName && node.name.toLowerCase().includes(lowerCaseQuery)) {
+                return node;
+            }
+
+            const filteredChildren = node.children
+                .map(filter)
+                .filter((n): n is FileNode => n !== null);
+
+            if (filteredChildren.length > 0) {
+                return { ...node, children: filteredChildren };
+            }
+        }
+
+        return null;
+    };
+
+    return nodes.map(filter).filter((n): n is FileNode => n !== null);
+};
+
+
+export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ files }) => {
+  const [selectedFile, setSelectedFile] = useState<FileType | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInName, setSearchInName] = useState(true);
+  const [searchInContent, setSearchInContent] = useState(false);
+  const { expandedFolders, toggleFolder, setExpandedFolders } = useFileTreeState();
+
+  const filteredFiles = useMemo(() => {
+      return filterNodes(files, searchQuery, searchInName, searchInContent);
+  }, [files, searchQuery, searchInName, searchInContent]);
+
+
+  useEffect(() => {
+      if (searchQuery) {
+          const allFolderPaths = new Set<string>();
+          const findFolders = (nodes: FileNode[], currentPath: string) => {
+              nodes.forEach(node => {
+                  const path = currentPath ? `${currentPath}/${node.name}` : node.name;
+                  if (node.type === 'folder') {
+                      allFolderPaths.add(path);
+                      findFolders(node.children, path);
+                  }
+              });
+          };
+          findFolders(filteredFiles, '');
+          setExpandedFolders(allFolderPaths);
+      } else {
+          // Collapse all folders when search is cleared
+          setExpandedFolders(new Set());
+      }
+  }, [searchQuery, searchInName, searchInContent, filteredFiles, setExpandedFolders]);
+
+  const handleDownloadZip = async () => {
+    if (!files || !window.JSZip) {
+        console.error("Files not available or JSZip not loaded.");
+        return;
+    }
+
+    const zip = new window.JSZip();
+
+    const addFilesToZip = (zipFolder: any, nodes: FileNode[]) => {
+        nodes.forEach(node => {
+            if (node.type === 'folder') {
+                const newFolder = zipFolder.folder(node.name);
+                if (node.children.length > 0) {
+                    addFilesToZip(newFolder, node.children);
+                }
+            } else {
+                zipFolder.file(node.name, node.content);
+            }
+        });
+    };
+    
+    addFilesToZip(zip, files);
+
+    try {
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'project.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    } catch (e) {
+        console.error("Error generating zip file:", e);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-2xl font-bold text-black dark:text-white">Generated Project</h3>
+        <button
+          onClick={handleDownloadZip}
+          className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500"
+        >
+          <ArrowDownTrayIcon className="h-5 w-5" />
+          <span>Download .zip</span>
+        </button>
+      </div>
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden h-[70vh] flex">
+        <div className="w-1/3 min-w-[250px] max-w-[400px] bg-gray-50 dark:bg-gray-900 flex flex-col">
+          <div className="p-2 border-b border-gray-200 dark:border-gray-700 space-y-2">
+                <input
+                    type="text"
+                    placeholder="Search files..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-gray-500 dark:placeholder-gray-400"
+                    aria-label="Filter files"
+                />
+                <div className="flex items-center justify-end space-x-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Search in:</span>
+                    <button 
+                        onClick={() => setSearchInName(prev => !prev)}
+                        className={`p-1.5 rounded-md transition-colors ${searchInName ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
+                        aria-pressed={searchInName}
+                        title="Search in file name"
+                    >
+                        <TagIcon className="h-4 w-4" />
+                    </button>
+                    <button 
+                        onClick={() => setSearchInContent(prev => !prev)}
+                        className={`p-1.5 rounded-md transition-colors ${searchInContent ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
+                        aria-pressed={searchInContent}
+                        title="Search in file content"
+                    >
+                        <DocumentTextIcon className="h-4 w-4" />
+                    </button>
+                </div>
+          </div>
+          <div className="p-2 overflow-y-auto flex-grow">
+            <FileTreeView
+                nodes={filteredFiles}
+                onSelectFile={setSelectedFile}
+                selectedFile={selectedFile}
+                expandedFolders={expandedFolders}
+                toggleFolder={toggleFolder}
+            />
+          </div>
+        </div>
+        <div className="w-2/3 flex-grow">
+          <ErrorBoundary>
+            <CodeViewer file={selectedFile} searchQuery={searchQuery} />
+          </ErrorBoundary>
+        </div>
+      </div>
+    </>
+  );
+};
+</file>
+
+</files>
